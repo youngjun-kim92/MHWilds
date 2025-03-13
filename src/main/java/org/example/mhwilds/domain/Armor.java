@@ -1,45 +1,59 @@
 package org.example.mhwilds.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Map;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+/**
+ * 방어구 도메인 클래스 - 단순화된 버전
+ */
 public class Armor {
-    private Long id;
-    private String name;                    // 방어구 이름
-    private ArmorType type;                 // 방어구 타입 (투구, 갑옷, 팔, 허리, 다리)
-    private int defense;                    // 방어력
-    private RarityType rarity;              // 레어도
-    private Map<String, Integer> resistance; // 속성 저항 (화, 수, 뇌, 빙, 용)
-    private Map<String, Integer> skills;    // 스킬 (스킬명, 레벨)
-    private String imageUrl;                // 이미지 경로
-    private String setName;                 // 세트 이름 (예: 리오소울, 네르기간테 등)
 
     /**
      * 방어구 타입 열거형
      */
     public enum ArmorType {
-        HEAD("투구"),
-        CHEST("갑옷"),
-        ARM("팔보호구"),
-        WAIST("허리보호구"),
-        LEG("다리보호구");
+        HEAD("투구", "머리를 보호하는 장비입니다."),
+        CHEST("갑옷", "상체를 보호하는 장비입니다."),
+        ARM("팔보호구", "팔을 보호하는 장비입니다."),
+        WAIST("허리보호구", "허리를 보호하는 장비입니다."),
+        LEG("다리보호구", "다리를 보호하는 장비입니다.");
 
         private final String korName;
+        private final String description;
 
-        ArmorType(String korName) {
+        ArmorType(String korName, String description) {
             this.korName = korName;
+            this.description = description;
         }
 
         public String getKorName() {
             return korName;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
+    /**
+     * 방어구 등급 열거형 (상위/하위 등급)
+     */
+    public enum ArmorRank {
+        LOW_RANK("하위", "초심자용 방어구로 비교적 제작이 쉽습니다."),
+        HIGH_RANK("상위", "중급자용 방어구로 더 높은 방어력과 스킬을 제공합니다."),
+        MASTER_RANK("마스터", "고급자용 방어구로 최고의 성능을 제공합니다.");
+
+        private final String korName;
+        private final String description;
+
+        ArmorRank(String korName, String description) {
+            this.korName = korName;
+            this.description = description;
+        }
+
+        public String getKorName() {
+            return korName;
+        }
+
+        public String getDescription() {
+            return description;
         }
     }
 

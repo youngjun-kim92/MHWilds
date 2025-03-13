@@ -11,60 +11,46 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class GachaService {
 
-    private final List<Weapon> weaponPool = new ArrayList<>();
-    private final Map<Armor.ArmorType, List<Armor>> armorPool = new EnumMap<>(Armor.ArmorType.class);
+    private final List<Weapon.WeaponType> weaponTypes = new ArrayList<>();
+    private final Map<Armor.ArmorType, List<Armor.ArmorRank>> armorRanks = new EnumMap<>(Armor.ArmorType.class);
+    private final Map<Armor.ArmorType, List<String>> armorNames = new EnumMap<>(Armor.ArmorType.class);
     private final Random random = ThreadLocalRandom.current();
 
     /**
-     * 서비스 초기화 시 무기와 방어구 데이터 로드
+     * 서비스 초기화 시 데이터 로드
      */
     @PostConstruct
     public void initialize() {
-        initializeWeaponPool();
-        initializeArmorPool();
+        initializeWeaponTypes();
+        initializeArmorRanks();
+        initializeArmorNames();
     }
 
     /**
-     * 랜덤 무기 뽑기
-     * @return 랜덤으로 선택된 무기
+     * 랜덤 무기 타입 뽑기
+     * @return 랜덤으로 선택된 무기 타입
      */
-    public Weapon drawRandomWeapon() {
-        if (weaponPool.isEmpty()) {
-            throw new IllegalStateException("무기 풀이 비어있습니다");
+    public Weapon.WeaponType drawRandomWeaponType() {
+        if (weaponTypes.isEmpty()) {
+            throw new IllegalStateException("무기 타입 풀이 비어있습니다");
         }
-        return weaponPool.get(random.nextInt(weaponPool.size()));
+        Weapon.WeaponType result = weaponTypes.get(random.nextInt(weaponTypes.size()));
+        return result;
     }
 
     /**
-     * 랜덤 방어구 세트 뽑기 (각 부위별 1개씩)
-     * @return 랜덤으로 선택된 방어구 세트 (부위별 맵)
+     * 랜덤 방어구 등급 뽑기 (각 부위별로 나오지 않을 수도 있음)
+     * @return 랜덤으로 선택된 방어구 부위와 등급 (일부 부위는 없을 수 있음)
      */
-    public Map<Armor.ArmorType, Armor> drawRandomArmorSet() {
-        Map<Armor.ArmorType, Armor> armorSet = new EnumMap<>(Armor.ArmorType.class);
-
-        for (Armor.ArmorType type : Armor.ArmorType.values()) {
-            List<Armor> armorsOfType = armorPool.get(type);
-            if (armorsOfType != null && !armorsOfType.isEmpty()) {
-                armorSet.put(type, armorsOfType.get(random.nextInt(armorsOfType.size())));
-            }
-        }
-
-        return armorSet;
-    }
-
-    /**
-     * 랜덤 방어구 세트 뽑기 (각 부위별로 나오지 않을 수도 있음)
-     * @return 랜덤으로 선택된 방어구 세트 (부위별 맵, 일부 부위는 없을 수 있음)
-     */
-    public Map<Armor.ArmorType, Armor> drawRandomArmorSetWithGaps() {
-        Map<Armor.ArmorType, Armor> armorSet = new EnumMap<>(Armor.ArmorType.class);
+    public Map<Armor.ArmorType, Armor.ArmorRank> drawRandomArmorRanksWithGaps() {
+        Map<Armor.ArmorType, Armor.ArmorRank> armorSet = new EnumMap<>(Armor.ArmorType.class);
 
         for (Armor.ArmorType type : Armor.ArmorType.values()) {
             // 각 부위당 70% 확률로 방어구가 나옴 (30% 확률로 나오지 않음)
             if (random.nextDouble() <= 0.7) {
-                List<Armor> armorsOfType = armorPool.get(type);
-                if (armorsOfType != null && !armorsOfType.isEmpty()) {
-                    armorSet.put(type, armorsOfType.get(random.nextInt(armorsOfType.size())));
+                List<Armor.ArmorRank> ranksOfType = armorRanks.get(type);
+                if (ranksOfType != null && !ranksOfType.isEmpty()) {
+                    armorSet.put(type, ranksOfType.get(random.nextInt(ranksOfType.size())));
                 }
             }
         }
@@ -73,533 +59,207 @@ public class GachaService {
     }
 
     /**
-     * 동일한 세트의 방어구만 뽑기
-     * @return 동일 세트의 방어구 맵
+     * 랜덤 방어구 이름 뽑기
+     * @param type 방어구 부위
+     * @return 랜덤으로 선택된 방어구 이름
      */
-    public Map<Armor.ArmorType, Armor> drawSameSetArmorSet() {
-        // 모든 세트 이름 수집
-        Set<String> setNames = new HashSet<>();
-        for (List<Armor> armors : armorPool.values()) {
-            for (Armor armor : armors) {
-                setNames.add(armor.getSetName());
-            }
+    public String drawRandomArmorName(Armor.ArmorType type) {
+        List<String> names = armorNames.get(type);
+        if (names == null || names.isEmpty()) {
+            return "랜덤" + getArmorTypeShortName(type);
         }
-
-        if (setNames.isEmpty()) {
-            return Collections.emptyMap();
-        }
-
-        // 랜덤으로 세트 이름 선택
-        List<String> setNameList = new ArrayList<>(setNames);
-        String randomSetName = setNameList.get(random.nextInt(setNameList.size()));
-
-        // 선택된 세트에 해당하는 방어구만 선택
-        Map<Armor.ArmorType, Armor> sameSetArmor = new EnumMap<>(Armor.ArmorType.class);
-
-        for (Armor.ArmorType type : Armor.ArmorType.values()) {
-            List<Armor> armorsOfType = armorPool.get(type);
-            if (armorsOfType != null) {
-                for (Armor armor : armorsOfType) {
-                    if (armor.getSetName().equals(randomSetName)) {
-                        sameSetArmor.put(type, armor);
-                        break;
-                    }
-                }
-            }
-        }
-
-        return sameSetArmor;
+        return names.get(random.nextInt(names.size()));
     }
 
     /**
-     * 무기와 방어구 세트 함께 뽑기
-     * @return 랜덤 무기와 방어구 세트
+     * 무기 타입과 방어구 등급 세트 함께 뽑기
+     * @return 랜덤 무기 타입과 방어구 등급 세트
      */
     public Map<String, Object> drawRandomLoadout() {
         Map<String, Object> loadout = new HashMap<>();
-        loadout.put("weapon", drawRandomWeapon());
-        loadout.put("armorSet", drawRandomArmorSet());
+        loadout.put("weaponType", drawRandomWeaponType());
+        loadout.put("armorRanks", drawRandomArmorRanksWithGaps());
         return loadout;
     }
 
     /**
-     * 특정 무기 타입만 뽑기
-     * @param weaponType 무기 타입
-     * @return 특정 타입의 랜덤 무기
+     * 무기 타입 초기화 - 모든 가능한 무기 타입 추가
      */
-    public Weapon drawSpecificWeaponType(Weapon.WeaponType weaponType) {
-        List<Weapon> specificTypeWeapons = weaponPool.stream()
-                .filter(weapon -> weapon.getType() == weaponType)
-                .toList();
-
-        if (specificTypeWeapons.isEmpty()) {
-            throw new IllegalArgumentException("해당 타입의 무기가 없습니다: " + weaponType);
-        }
-
-        return specificTypeWeapons.get(random.nextInt(specificTypeWeapons.size()));
+    private void initializeWeaponTypes() {
+        // 모든 무기 타입 추가
+        weaponTypes.addAll(Arrays.asList(Weapon.WeaponType.values()));
     }
 
     /**
-     * 무기 데이터 초기화
+     * 방어구 등급 초기화 - 각 부위별로 가능한 등급 추가
      */
-    private void initializeWeaponPool() {
-        // 대검
-        weaponPool.add(Weapon.builder()
-                .id(1L)
-                .name("자갈투성이")
-                .type(Weapon.WeaponType.GREAT_SWORD)
-                .attack(1248)
-                .element(Weapon.ElementType.NONE)
-                .rarity(Weapon.RarityType.RARE_6)
-                .imageUrl("/images/weapons/great_sword_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(2L)
-                .name("재거너스")
-                .type(Weapon.WeaponType.GREAT_SWORD)
-                .attack(1296)
-                .element(Weapon.ElementType.NONE)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/great_sword_2.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(3L)
-                .name("이그니션")
-                .type(Weapon.WeaponType.GREAT_SWORD)
-                .attack(1344)
-                .element(Weapon.ElementType.FIRE)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/img/weapons/great_sword_3.png")
-                .build());
-
-        // 태도
-        weaponPool.add(Weapon.builder()
-                .id(4L)
-                .name("신뢰의 날")
-                .type(Weapon.WeaponType.LONG_SWORD)
-                .attack(792)
-                .element(Weapon.ElementType.NONE)
-                .rarity(Weapon.RarityType.RARE_6)
-                .imageUrl("/images/weapons/long_sword_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(5L)
-                .name("멸진도")
-                .type(Weapon.WeaponType.LONG_SWORD)
-                .attack(825)
-                .element(Weapon.ElementType.DRAGON)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/long_sword_2.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(6L)
-                .name("다인 왕검")
-                .type(Weapon.WeaponType.LONG_SWORD)
-                .attack(858)
-                .element(Weapon.ElementType.THUNDER)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/images/weapons/long_sword_3.png")
-                .build());
-
-        // 쌍검
-        weaponPool.add(Weapon.builder()
-                .id(7L)
-                .name("화룡쌍도")
-                .type(Weapon.WeaponType.DUAL_BLADES)
-                .attack(322)
-                .element(Weapon.ElementType.FIRE)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/dual_blades_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(8L)
-                .name("뇌전쌍도")
-                .type(Weapon.WeaponType.DUAL_BLADES)
-                .attack(336)
-                .element(Weapon.ElementType.THUNDER)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/images/weapons/dual_blades_2.png")
-                .build());
-
-        // 랜스
-        weaponPool.add(Weapon.builder()
-                .id(9L)
-                .name("붉은 맹습")
-                .type(Weapon.WeaponType.LANCE)
-                .attack(460)
-                .element(Weapon.ElementType.FIRE)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/lance_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(10L)
-                .name("사자왕의 랜스")
-                .type(Weapon.WeaponType.LANCE)
-                .attack(483)
-                .element(Weapon.ElementType.NONE)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/images/weapons/lance_2.png")
-                .build());
-
-        // 건랜스
-        weaponPool.add(Weapon.builder()
-                .id(11L)
-                .name("왕의 건랜스")
-                .type(Weapon.WeaponType.GUNLANCE)
-                .attack(598)
-                .element(Weapon.ElementType.NONE)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/gunlance_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(12L)
-                .name("암용의 건랜스")
-                .type(Weapon.WeaponType.GUNLANCE)
-                .attack(621)
-                .element(Weapon.ElementType.DRAGON)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/images/weapons/gunlance_2.png")
-                .build());
-
-        // 활
-        weaponPool.add(Weapon.builder()
-                .id(13L)
-                .name("파멸의 활")
-                .type(Weapon.WeaponType.BOW)
-                .attack(312)
-                .element(Weapon.ElementType.DRAGON)
-                .rarity(Weapon.RarityType.RARE_7)
-                .imageUrl("/images/weapons/bow_1.png")
-                .build());
-
-        weaponPool.add(Weapon.builder()
-                .id(14L)
-                .name("천재의 활")
-                .type(Weapon.WeaponType.BOW)
-                .attack(336)
-                .element(Weapon.ElementType.THUNDER)
-                .rarity(Weapon.RarityType.RARE_8)
-                .imageUrl("/images/weapons/bow_2.png")
-                .build());
-    }
-
-    /**
-     * 방어구 데이터 초기화
-     */
-    private void initializeArmorPool() {
-        // 초기화
+    private void initializeArmorRanks() {
+        // 각 방어구 부위별로 가능한 등급 초기화
         for (Armor.ArmorType type : Armor.ArmorType.values()) {
-            armorPool.put(type, new ArrayList<>());
+            List<Armor.ArmorRank> ranks = new ArrayList<>();
+            // 각 등급 추가 (마스터 등급은 제외)
+            ranks.add(Armor.ArmorRank.LOW_RANK);
+            ranks.add(Armor.ArmorRank.HIGH_RANK);
+            armorRanks.put(type, ranks);
         }
-
-        // 리오소울 세트 (레어 7)
-        addRathalosArmorSet();
-
-        // 네르기간테 세트 (레어 8)
-        addNergiganteArmorSet();
-
-        // 오도가론 세트 (레어 7)
-        addOdogaronArmorSet();
     }
 
     /**
-     * 리오소울 세트 추가
+     * 방어구 부위별 짧은 이름 가져오기
      */
-    private void addRathalosArmorSet() {
-        // 리오소울 저항
-        Map<String, Integer> rathalosResistance = new HashMap<>();
-        rathalosResistance.put("fire", 3);
-        rathalosResistance.put("water", -2);
-        rathalosResistance.put("thunder", 0);
-        rathalosResistance.put("ice", -1);
-        rathalosResistance.put("dragon", -3);
-
-        // 투구
-        Map<String, Integer> rathalosHeadSkills = new HashMap<>();
-        rathalosHeadSkills.put("공격", 2);
-        rathalosHeadSkills.put("약점 특효", 1);
-
-        armorPool.get(Armor.ArmorType.HEAD).add(Armor.builder()
-                .id(1L)
-                .name("리오소울 헬름")
-                .type(Armor.ArmorType.HEAD)
-                .defense(68)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(rathalosResistance))
-                .skills(rathalosHeadSkills)
-                .imageUrl("/images/armors/rathalos_head.png")
-                .setName("리오소울")
-                .build());
-
-        // 갑옷
-        Map<String, Integer> rathalosChestSkills = new HashMap<>();
-        rathalosChestSkills.put("약점 특효", 1);
-        rathalosChestSkills.put("체력 회복량 UP", 1);
-
-        armorPool.get(Armor.ArmorType.CHEST).add(Armor.builder()
-                .id(2L)
-                .name("리오소울 메일")
-                .type(Armor.ArmorType.CHEST)
-                .defense(68)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(rathalosResistance))
-                .skills(rathalosChestSkills)
-                .imageUrl("/images/armors/rathalos_chest.png")
-                .setName("리오소울")
-                .build());
-
-        // 팔 보호구
-        Map<String, Integer> rathalosArmSkills = new HashMap<>();
-        rathalosArmSkills.put("공격", 1);
-        rathalosArmSkills.put("약점 특효", 1);
-
-        armorPool.get(Armor.ArmorType.ARM).add(Armor.builder()
-                .id(3L)
-                .name("리오소울 팔보호구")
-                .type(Armor.ArmorType.ARM)
-                .defense(68)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(rathalosResistance))
-                .skills(rathalosArmSkills)
-                .imageUrl("/images/armors/rathalos_arm.png")
-                .setName("리오소울")
-                .build());
-
-        // 허리 보호구
-        Map<String, Integer> rathalosWaistSkills = new HashMap<>();
-        rathalosWaistSkills.put("날카로움", 1);
-        rathalosWaistSkills.put("통상탄/연사확장", 1);
-
-        armorPool.get(Armor.ArmorType.WAIST).add(Armor.builder()
-                .id(4L)
-                .name("리오소울 코일")
-                .type(Armor.ArmorType.WAIST)
-                .defense(68)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(rathalosResistance))
-                .skills(rathalosWaistSkills)
-                .imageUrl("/images/armors/rathalos_waist.png")
-                .setName("리오소울")
-                .build());
-
-        // 다리 보호구
-        Map<String, Integer> rathalosLegSkills = new HashMap<>();
-        rathalosLegSkills.put("점프 달인", 1);
-        rathalosLegSkills.put("체력 회복량 UP", 1);
-
-        armorPool.get(Armor.ArmorType.LEG).add(Armor.builder()
-                .id(5L)
-                .name("리오소울 그리브")
-                .type(Armor.ArmorType.LEG)
-                .defense(68)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(rathalosResistance))
-                .skills(rathalosLegSkills)
-                .imageUrl("/images/armors/rathalos_leg.png")
-                .setName("리오소울")
-                .build());
+    private String getArmorTypeShortName(Armor.ArmorType type) {
+        switch (type) {
+            case HEAD:
+                return "헬름";
+            case CHEST:
+                return "메일";
+            case ARM:
+                return "암즈";
+            case WAIST:
+                return "코일";
+            case LEG:
+                return "그리브";
+            default:
+                return "";
+        }
     }
 
     /**
-     * 네르기간테 세트 추가
+     * 방어구 이름 데이터 초기화
      */
-    private void addNergiganteArmorSet() {
-        // 네르기간테 저항
-        Map<String, Integer> nergResistance = new HashMap<>();
-        nergResistance.put("fire", 1);
-        nergResistance.put("water", 1);
-        nergResistance.put("thunder", 1);
-        nergResistance.put("ice", 1);
-        nergResistance.put("dragon", -3);
+    private void initializeArmorNames() {
+        // HEAD (머리) 방어구 이름 추가
+        List<String> headNames = Arrays.asList(
+                "슈바르카헬름α", "슈바르카헬름β", "호쇄인룡헬름α", "호쇄인룡헬름β", "길드에이스피어스α",
+                "도베르헬름α", "다마스크헬름α", "다하딜라헬름α", "다하딜라헬름β", "투나물헬름α",
+                "투나물헬름β", "레다젤트헬름α", "레다젤트헬름β", "이그졸스헬름α", "이그졸스헬름β",
+                "고어헬름α", "고어헬름β", "하이메탈헬름α", "배틀헬름α", "멜호아프롤α",
+                "조사단헬름α", "잉곳헬름α", "호뢰악룡헬름α", "호뢰악룡헬름β", "도샤구마헬름α",
+                "도샤구마헬름β", "호벽수헬름α", "호벽수헬름β", "아자라헬름α", "아자라헬름β",
+                "호흉조룡헬름α", "호흉조룡헬름β", "시이우헬름α", "시이우헬름β", "레우스헬름α",
+                "레우스헬름β", "호화룡헬름α", "호화룡헬름β", "그라비드헬름α", "그라비드헬름β",
+                "블랑고헬름α", "블랑고헬름β", "아티어헬름α", "쿠나파헤드α", "아즈즈헤드α",
+                "실드후드α", "데스기어게힐α", "파피메르테스타α", "킹비트테스타α", "발라헬름α",
+                "발라헬름β", "히라바미헬름α", "히라바미헬름β", "꽃성성이α", "조사대의 귀걸이α",
+                "레이아헬름α", "레이아헬름β", "호프마스크α", "레더헤드α", "체인헤드α",
+                "본헬름α", "얼로이헬름α", "브라치카글라스α", "브라치카글라스β", "랑고헬름α",
+                "랑고헬름β", "네라치카액세서리α", "네라치카액세서리β", "쿡크헬름α", "쿡크헬름β",
+                "차타헬름α", "차타헬름β", "트리스헬름α", "트리스헬름β", "라바라헬름α",
+                "라바라헬름β", "콩가헬름α", "콩가헬름β", "푸포루헬름α", "푸포루헬름β",
+                "게리오스헬름α", "게리오스헬름β", "스큐라헬름α", "스큐라헬름β", "투나물헬름",
+                "레다젤트헬름", "이그졸스헬름", "호벽수헬름", "호화룡헬름", "호흉조룡헬름",
+                "시이우헬름", "호쇄인룡헬름", "잉곳헬름", "네라치카액세서리", "푸포루헬름",
+                "스큐라헬름", "히라바미헬름", "아자라헬름", "콩가헬름", "발라헬름",
+                "도샤구마헬름", "호프마스크", "레더헤드", "체인헤드", "본헬름",
+                "브라치카글라스", "차타헬름", "트리스헬름", "얼로이헬름", "랑고헬름",
+                "라바라헬름"
+        );
+        armorNames.put(Armor.ArmorType.HEAD, headNames);
 
-        // 투구
-        Map<String, Integer> nergHeadSkills = new HashMap<>();
-        nergHeadSkills.put("패기", 1);
-        nergHeadSkills.put("최대 체력 증가", 1);
+        // CHEST (몸통) 방어구 이름 추가
+        List<String> chestNames = Arrays.asList(
+                "슈바르카메일α", "슈바르카메일β", "호쇄인룡메일α", "호쇄인룡메일β", "길드에이스메일α",
+                "도베르메일α", "다마스크메일α", "다하딜라메일α", "다하딜라메일β", "투나물메일α",
+                "투나물메일β", "레다젤트메일α", "레다젤트메일β", "이그졸스메일α", "이그졸스메일β",
+                "고어메일α", "고어메일β", "하이메탈메일α", "배틀메일α", "멜호아토론코α",
+                "조사단메일α", "잉곳메일α", "호뢰악룡메일α", "호뢰악룡메일β", "도샤구마메일α",
+                "도샤구마메일β", "호벽수메일α", "호벽수메일β", "아자라메일α", "아자라메일β",
+                "호흉조룡메일α", "호흉조룡메일β", "시이우메일α", "시이우메일β", "레우스메일α",
+                "레우스메일β", "호화룡메일α", "호화룡메일β", "그라비드메일α", "그라비드메일β",
+                "블랑고메일α", "블랑고메일β", "아티어메일α", "쿠나파케이프α", "아즈즈에이프런α",
+                "실드코트α", "데스기어무스켈α", "파피메르페트α", "킹비트페트α", "발라메일α",
+                "발라메일β", "히라바미메일α", "히라바미메일β", "레이아메일α", "레이아메일β",
+                "호프메일α", "레더베스트α", "체인베스트α", "본메일α", "얼로이메일α",
+                "랑고메일α", "랑고메일β", "크라노다스메일α", "크라노다스메일β", "쿡크메일α",
+                "쿡크메일β", "차타메일α", "차타메일β", "트리스메일α", "트리스메일β",
+                "라바라메일α", "라바라메일β", "콩가메일α", "콩가메일β", "푸포루메일α",
+                "푸포루메일β", "게리오스메일α", "게리오스메일β", "스큐라메일α", "스큐라메일β",
+                "투나물메일", "레다젤트메일", "이그졸스메일", "호벽수메일", "호화룡메일",
+                "호흉조룡메일", "시이우메일", "호쇄인룡메일", "잉곳메일", "크라노다스메일",
+                "푸포루메일", "스큐라메일", "히라바미메일", "아자라메일", "콩가메일",
+                "발라메일", "도샤구마메일", "호프메일", "레더베스트", "체인베스트",
+                "본메일", "차타메일", "트리스메일", "얼로이메일", "랑고메일",
+                "라바라메일"
+        );
+        armorNames.put(Armor.ArmorType.CHEST, chestNames);
 
-        armorPool.get(Armor.ArmorType.HEAD).add(Armor.builder()
-                .id(6L)
-                .name("네르기간테 투구")
-                .type(Armor.ArmorType.HEAD)
-                .defense(72)
-                .rarity(Armor.RarityType.RARE_8)
-                .resistance(new HashMap<>(nergResistance))
-                .skills(nergHeadSkills)
-                .imageUrl("/images/armors/nergigante_head.png")
-                .setName("네르기간테")
-                .build());
+        // ARM (팔) 방어구 이름 추가
+        List<String> armNames = Arrays.asList(
+                "슈바르카암α", "슈바르카암β", "호쇄인룡암α", "호쇄인룡암β", "길드에이스암α",
+                "도베르암α", "다마스크암α", "다하딜라암α", "다하딜라암β", "투나물암α",
+                "투나물암β", "레다젤트암α", "레다젤트암β", "이그졸스암α", "이그졸스암β",
+                "고어암α", "고어암β", "하이메탈암α", "배틀암α", "멜호아라마α",
+                "조사단암α", "잉곳암α", "호뢰악룡암α", "호뢰악룡암β", "도샤구마암α",
+                "도샤구마암β", "호벽수암α", "호벽수암β", "아자라암α", "아자라암β",
+                "호흉조룡암α", "호흉조룡암β", "시이우암α", "시이우암β", "레우스암α",
+                "레우스암β", "호화룡암α", "호화룡암β", "그라비드암α", "그라비드암β",
+                "블랑고암α", "블랑고암β", "아티어암α", "데스기어파오스트α", "파피메르마노α",
+                "킹비트마노α", "발라암α", "발라암β", "히라바미암α", "히라바미암β",
+                "레이아암α", "레이아암β", "호프암α", "레더글러브α", "체인글러브α",
+                "본암α", "얼로이암α", "탈리오스암α", "탈리오스암β", "랑고암α",
+                "랑고암β", "쿡크암α", "쿡크암β", "차타암α", "차타암β",
+                "트리스암α", "트리스암β", "라바라암α", "라바라암β", "콩가암α",
+                "콩가암β", "푸포루암α", "푸포루암β", "게리오스암α", "게리오스암β",
+                "스큐라암α", "스큐라암β", "투나물암", "레다젤트암", "이그졸스암",
+                "호벽수암", "호화룡암", "호흉조룡암", "시이우암", "호쇄인룡암",
+                "잉곳암", "푸포루암", "스큐라암", "히라바미암", "아자라암",
+                "콩가암", "발라암", "도샤구마암", "호프암", "레더글러브",
+                "체인글러브", "본암", "탈리오스암", "차타암", "트리스암",
+                "얼로이암", "랑고암", "라바라암"
+        );
+        armorNames.put(Armor.ArmorType.ARM, armNames);
 
-        // 갑옷
-        Map<String, Integer> nergChestSkills = new HashMap<>();
-        nergChestSkills.put("패기", 1);
-        nergChestSkills.put("공격", 1);
+        // WAIST (허리) 방어구 이름 추가
+        List<String> waistNames = Arrays.asList(
+                "슈바르카코일α", "슈바르카코일β", "호쇄인룡코일α", "호쇄인룡코일β", "길드에이스코일α",
+                "도베르코일α", "다마스크코일α", "다하딜라코일α", "다하딜라코일β", "투나물코일α",
+                "투나물코일β", "레다젤트코일α", "레다젤트코일β", "이그졸스코일α", "이그졸스코일β",
+                "고어코일α", "고어코일β", "하이메탈코일α", "배틀코일α", "멜호아오하α",
+                "조사단코일α", "잉곳코일α", "호뢰악룡코일α", "호뢰악룡코일β", "도샤구마코일α",
+                "도샤구마코일β", "호벽수코일α", "호벽수코일β", "아자라코일α", "아자라코일β",
+                "호흉조룡코일α", "호흉조룡코일β", "시이우코일α", "시이우코일β", "레우스코일α",
+                "레우스코일β", "호화룡코일α", "호화룡코일β", "그라비드코일α", "그라비드코일β",
+                "블랑고코일α", "블랑고코일β", "스자의 허리띠α", "아티어코일α", "쿠나파벨트α",
+                "데스기어네이블α", "파피메르앙카α", "킹비트앙카α", "스큐라코일β", "발라코일α",
+                "발라코일β", "히라바미코일α", "히라바미코일β", "레이아코일α", "레이아코일β",
+                "호프코일α", "레더벨트α", "체인벨트α", "본코일α", "얼로이코일α",
+                "랑고코일α", "랑고코일β", "쿡크코일α", "쿡크코일β", "차타코일α",
+                "차타코일β", "트리스코일α", "트리스코일β", "라바라코일α", "라바라코일β",
+                "콩가코일α", "콩가코일β", "푸포루코일α", "푸포루코일β", "게리오스코일α",
+                "게리오스코일β", "스큐라코일α", "투나물코일", "레다젤트코일", "이그졸스코일",
+                "호벽수코일", "호화룡코일", "호흉조룡코일", "시이우코일", "호쇄인룡코일",
+                "잉곳코일", "푸포루코일", "스큐라코일", "히라바미코일", "아자라코일",
+                "콩가코일", "발라코일", "도샤구마코일", "호프코일", "레더벨트",
+                "체인벨트", "본코일", "차타코일", "트리스코일", "얼로이코일",
+                "랑고코일", "라바라코일"
+        );
+        armorNames.put(Armor.ArmorType.WAIST, waistNames);
 
-        armorPool.get(Armor.ArmorType.CHEST).add(Armor.builder()
-                .id(7L)
-                .name("네르기간테 메일")
-                .type(Armor.ArmorType.CHEST)
-                .defense(72)
-                .rarity(Armor.RarityType.RARE_8)
-                .resistance(new HashMap<>(nergResistance))
-                .skills(nergChestSkills)
-                .imageUrl("/images/armors/nergigante_chest.png")
-                .setName("네르기간테")
-                .build());
-
-        // 팔 보호구
-        Map<String, Integer> nergArmSkills = new HashMap<>();
-        nergArmSkills.put("패기", 1);
-        nergArmSkills.put("스태미나 급속 회복", 1);
-
-        armorPool.get(Armor.ArmorType.ARM).add(Armor.builder()
-                .id(8L)
-                .name("네르기간테 팔보호구")
-                .type(Armor.ArmorType.ARM)
-                .defense(72)
-                .rarity(Armor.RarityType.RARE_8)
-                .resistance(new HashMap<>(nergResistance))
-                .skills(nergArmSkills)
-                .imageUrl("/images/armors/nergigante_arm.png")
-                .setName("네르기간테")
-                .build());
-
-        // 허리 보호구
-        Map<String, Integer> nergWaistSkills = new HashMap<>();
-        nergWaistSkills.put("패기", 1);
-        nergWaistSkills.put("공격", 1);
-
-        armorPool.get(Armor.ArmorType.WAIST).add(Armor.builder()
-                .id(9L)
-                .name("네르기간테 코일")
-                .type(Armor.ArmorType.WAIST)
-                .defense(72)
-                .rarity(Armor.RarityType.RARE_8)
-                .resistance(new HashMap<>(nergResistance))
-                .skills(nergWaistSkills)
-                .imageUrl("/images/armors/nergigante_waist.png")
-                .setName("네르기간테")
-                .build());
-
-        // 다리 보호구
-        Map<String, Integer> nergLegSkills = new HashMap<>();
-        nergLegSkills.put("패기", 1);
-        nergLegSkills.put("날카로움", 1);
-
-        armorPool.get(Armor.ArmorType.LEG).add(Armor.builder()
-                .id(10L)
-                .name("네르기간테 그리브")
-                .type(Armor.ArmorType.LEG)
-                .defense(72)
-                .rarity(Armor.RarityType.RARE_8)
-                .resistance(new HashMap<>(nergResistance))
-                .skills(nergLegSkills)
-                .imageUrl("/images/armors/nergigante_leg.png")
-                .setName("네르기간테")
-                .build());
-    }
-
-    /**
-     * 오도가론 세트 추가
-     */
-    private void addOdogaronArmorSet() {
-        // 오도가론 저항
-        Map<String, Integer> odoResistance = new HashMap<>();
-        odoResistance.put("fire", 2);
-        odoResistance.put("water", 2);
-        odoResistance.put("thunder", -2);
-        odoResistance.put("ice", -3);
-        odoResistance.put("dragon", 2);
-
-        // 투구
-        Map<String, Integer> odoHeadSkills = new HashMap<>();
-        odoHeadSkills.put("치명타 강화", 1);
-        odoHeadSkills.put("체력 회복량 UP", 1);
-
-        armorPool.get(Armor.ArmorType.HEAD).add(Armor.builder()
-                .id(11L)
-                .name("오도가론 헬름")
-                .type(Armor.ArmorType.HEAD)
-                .defense(64)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(odoResistance))
-                .skills(odoHeadSkills)
-                .imageUrl("/images/armors/odogaron_head.png")
-                .setName("오도가론")
-                .build());
-
-        // 갑옷
-        Map<String, Integer> odoChestSkills = new HashMap<>();
-        odoChestSkills.put("치명타 강화", 1);
-        odoChestSkills.put("회심", 1);
-
-        armorPool.get(Armor.ArmorType.CHEST).add(Armor.builder()
-                .id(12L)
-                .name("오도가론 메일")
-                .type(Armor.ArmorType.CHEST)
-                .defense(64)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(odoResistance))
-                .skills(odoChestSkills)
-                .imageUrl("/images/armors/odogaron_chest.png")
-                .setName("오도가론")
-                .build());
-
-        // 팔 보호구
-        Map<String, Integer> odoArmSkills = new HashMap<>();
-        odoArmSkills.put("회심", 1);
-        odoArmSkills.put("속성 공격 강화", 1);
-
-        armorPool.get(Armor.ArmorType.ARM).add(Armor.builder()
-                .id(13L)
-                .name("오도가론 팔보호구")
-                .type(Armor.ArmorType.ARM)
-                .defense(64)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(odoResistance))
-                .skills(odoArmSkills)
-                .imageUrl("/images/armors/odogaron_arm.png")
-                .setName("오도가론")
-                .build());
-
-        // 허리 보호구
-        Map<String, Integer> odoWaistSkills = new HashMap<>();
-        odoWaistSkills.put("날카로움", 1);
-        odoWaistSkills.put("출혈 내성", 1);
-
-        armorPool.get(Armor.ArmorType.WAIST).add(Armor.builder()
-                .id(14L)
-                .name("오도가론 코일")
-                .type(Armor.ArmorType.WAIST)
-                .defense(64)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(odoResistance))
-                .skills(odoWaistSkills)
-                .imageUrl("/images/armors/odogaron_waist.png")
-                .setName("오도가론")
-                .build());
-
-        // 다리 보호구
-        Map<String, Integer> odoLegSkills = new HashMap<>();
-        odoLegSkills.put("회심", 1);
-        odoLegSkills.put("빠른 납도", 1);
-
-        armorPool.get(Armor.ArmorType.LEG).add(Armor.builder()
-                .id(15L)
-                .name("오도가론 그리브")
-                .type(Armor.ArmorType.LEG)
-                .defense(64)
-                .rarity(Armor.RarityType.RARE_7)
-                .resistance(new HashMap<>(odoResistance))
-                .skills(odoLegSkills)
-                .imageUrl("/images/armors/odogaron_leg.png")
-                .setName("오도가론")
-                .build());
+        // LEG (다리) 방어구 이름 추가
+        List<String> legNames = Arrays.asList(
+                "슈바르카그리브α", "슈바르카그리브β", "호쇄인룡그리브α", "호쇄인룡그리브β", "길드에이스부츠α",
+                "도베르그리브α", "다마스크그리브α", "다하딜라그리브α", "다하딜라그리브β", "투나물그리브α",
+                "투나물그리브β", "레다젤트그리브α", "레다젤트그리브β", "이그졸스그리브α", "이그졸스그리브β",
+                "고어그리브α", "고어그리브β", "하이메탈그리브α", "배틀그리브α", "멜호아라이스α",
+                "조사단그리브α", "잉곳그리브α", "가쟈우부츠α", "호뢰악룡그리브α", "호뢰악룡그리브β",
+                "도샤구마그리브α", "도샤구마그리브β", "호벽수그리브α", "호벽수그리브β", "아자라그리브α",
+                "아자라그리브β", "호흉조룡그리브α", "호흉조룡그리브β", "시이우그리브α", "시이우그리브β",
+                "레우스그리브α", "레우스그리브β", "호화룡그리브α", "호화룡그리브β", "그라비드그리브α",
+                "그라비드그리브β", "블랑고그리브α", "블랑고그리브β", "아티어그리브α", "쿠나파챕스α",
+                "아즈즈팬츠α", "데스기어페르제α", "파피메르감바α", "킹비트감바α", "스큐라그리브β",
+                "발라그리브α", "발라그리브β", "히라바미그리브α", "히라바미그리브β", "레이아그리브α",
+                "레이아그리브β", "호프그리브α", "레더팬츠α", "체인팬츠α", "본그리브α",
+                "얼로이그리브α", "필라길그리브α", "필라길그리브β", "랑고그리브α", "랑고그리브β",
+                "쿡크그리브α", "쿡크그리브β", "차타그리브α", "차타그리브β", "트리스그리브α",
+                "트리스그리브β", "라바라그리브α", "라바라그리브β", "콩가그리브α", "콩가그리브β",
+                "푸포루그리브α", "푸포루그리브β", "게리오스그리브α", "게리오스그리브β", "스큐라그리브α",
+                "투나물그리브", "레다젤트그리브", "이그졸스그리브", "호벽수그리브", "호화룡그리브",
+                "호흉조룡그리브", "시이우그리브", "호쇄인룡그리브", "잉곳그리브", "푸포루그리브",
+                "스큐라그리브", "히라바미그리브", "아자라그리브", "콩가그리브", "발라그리브",
+                "도샤구마그리브", "호프그리브", "레더팬츠", "체인팬츠", "본그리브",
+                "가쟈우부츠", "차타그리브", "트리스그리브", "얼로이그리브", "필라길그리브",
+                "랑고그리브", "라바라그리브"
+        );
+        armorNames.put(Armor.ArmorType.LEG, legNames);
     }
 }

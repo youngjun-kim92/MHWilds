@@ -1,22 +1,9 @@
 package org.example.mhwilds.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
+/**
+ * 무기 도메인 클래스 - 단순화된 버전
+ */
 public class Weapon {
-    private Long id;
-    private String name;        // 무기 이름
-    private WeaponType type;    // 무기 종류
-    private int attack;         // 공격력
-    private ElementType element; // 속성
-    private RarityType rarity;  // 레어도
-    private String imageUrl;    // 이미지 경로
 
     /**
      * 무기 종류 열거형
@@ -24,7 +11,7 @@ public class Weapon {
     public enum WeaponType {
         GREAT_SWORD("대검"),
         LONG_SWORD("태도"),
-        SWORD_AND_SHIELD("검과 방패"),
+        SWORD_AND_SHIELD("한손검"),
         DUAL_BLADES("쌍검"),
         HAMMER("해머"),
         HUNTING_HORN("수렵피리"),

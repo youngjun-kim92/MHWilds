@@ -22,31 +22,32 @@ public class GachaController {
 
     @GetMapping("/")
     public String home(Model model) {
-        // 무기 타입 목록을 모델에 추가
+        // 무기 타입 목록과 방어구 타입 목록을 모델에 추가
         model.addAttribute("weaponTypes", Weapon.WeaponType.values());
         model.addAttribute("armorTypes", Armor.ArmorType.values());
+        model.addAttribute("armorRanks", Armor.ArmorRank.values());
         return "index";
     }
 
     @PostMapping("/gacha/weapon")
     @ResponseBody
-    public Weapon drawRandomWeapon() {
-        return gachaService.drawRandomWeapon();
+    public Weapon.WeaponType drawRandomWeaponType() {
+        Weapon.WeaponType result = gachaService.drawRandomWeaponType();
+        // 디버깅을 위해 로그 추가
+        System.out.println("컨트롤러에서 반환하는 무기 타입: " + result);
+        return result;
     }
 
     @PostMapping("/gacha/armor")
     @ResponseBody
-    public Map<Armor.ArmorType, Armor> drawRandomArmorSet() {
+    public Map<Armor.ArmorType, Armor.ArmorRank> drawRandomArmorSet() {
         // 수정된 방식: 각 부위당 일정 확률로 없을 수도 있음
-        return gachaService.drawRandomArmorSetWithGaps();
+        return gachaService.drawRandomArmorRanksWithGaps();
     }
 
     @PostMapping("/gacha/loadout")
     @ResponseBody
     public Map<String, Object> drawRandomLoadout() {
-        Map<String, Object> loadout = new java.util.HashMap<>();
-        loadout.put("weapon", gachaService.drawRandomWeapon());
-        loadout.put("armorSet", gachaService.drawRandomArmorSetWithGaps());
-        return loadout;
+        return gachaService.drawRandomLoadout();
     }
 }
