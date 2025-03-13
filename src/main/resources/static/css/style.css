@@ -1,0 +1,111 @@
+/* 기본 스타일 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+}
+
+/* 무기 관련 스타일 */
+.weapon-image-container {
+    background-color: rgba(13, 110, 253, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weapon-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* 방어구 관련 스타일 */
+.armor-piece {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+.armor-piece:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.armor-title {
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.armor-image-container {
+    background-color: rgba(25, 135, 84, 0.05);
+    border-radius: 6px;
+    width: 100%;
+    height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.armor-image {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+}
+
+/* 내성 스타일 */
+.resistance {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.resistance.fire {
+    color: #dc3545;
+}
+
+.resistance.water {
+    color: #0d6efd;
+}
+
+.resistance.thunder {
+    color: #ffc107;
+}
+
+.resistance.ice {
+    color: #0dcaf0;
+}
+
+.resistance.dragon {
+    color: #6f42c1;
+}
+
+/* 스킬 목록 스타일 */
+.skill-list, .total-skills-list {
+    padding-left: 18px;
+    font-size: 0.85rem;
+}
+
+.skill-list li, .total-skills-list li {
+    margin-bottom: 3px;
+}
+
+/* 반응형 조정 */
+@media (max-width: 767.98px) {
+    .weapon-image-container {
+        width: 150px;
+        height: 150px;
+    }
+
+    .armor-image-container {
+        height: 70px;
+    }
+}
