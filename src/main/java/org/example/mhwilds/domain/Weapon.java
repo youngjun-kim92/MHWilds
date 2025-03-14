@@ -1,7 +1,7 @@
 package org.example.mhwilds.domain;
 
 /**
- * 무기 도메인 클래스 - 단순화된 버전
+ * 무기 관련 도메인 클래스
  */
 public class Weapon {
 
@@ -35,57 +35,23 @@ public class Weapon {
         }
     }
 
-    /**
-     * 속성 열거형
-     */
-    public enum ElementType {
-        NONE("무속성"),
-        FIRE("화속성"),
-        WATER("수속성"),
-        THUNDER("뇌속성"),
-        ICE("빙속성"),
-        DRAGON("용속성");
+    private WeaponType type;
+    private String name;
 
-        private final String korName;
-
-        ElementType(String korName) {
-            this.korName = korName;
-        }
-
-        public String getKorName() {
-            return korName;
-        }
+    // Getters and Setters
+    public WeaponType getType() {
+        return type;
     }
 
-    /**
-     * 레어도 열거형
-     */
-    public enum RarityType {
-        RARE_1("레어 1", "#FFFFFF"),
-        RARE_2("레어 2", "#AAFFAA"),
-        RARE_3("레어 3", "#55FF55"),
-        RARE_4("레어 4", "#AAAAFF"),
-        RARE_5("레어 5", "#5555FF"),
-        RARE_6("레어 6", "#FFAAFF"),
-        RARE_7("레어 7", "#FF55FF"),
-        RARE_8("레어 8", "#FFAA55"),
-        RARE_9("레어 9", "#FF5555"),
-        RARE_10("레어 10", "#FF9999");
+    public void setType(WeaponType type) {
+        this.type = type;
+    }
 
-        private final String korName;
-        private final String colorCode;
+    public String getName() {
+        return name;
+    }
 
-        RarityType(String korName, String colorCode) {
-            this.korName = korName;
-            this.colorCode = colorCode;
-        }
-
-        public String getKorName() {
-            return korName;
-        }
-
-        public String getColorCode() {
-            return colorCode;
-        }
+    public void setName(String name) {
+        this.name = name;
     }
 }
