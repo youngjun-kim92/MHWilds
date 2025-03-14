@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +7,138 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .info-box {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            height: 100%;
+            border-left: 4px solid #0dcaf0;
+        }
+
+        .special-monster {
+            font-weight: bold;
+            color: #fd7e14;
+        }
+
+        .special-monsters-list {
+            font-weight: normal;
+            color: inherit;
+            font-size: 0.85rem;
+        }
+
+        .monster-info-trigger, .armor-info-trigger {
+            cursor: help;
+        }
+
+        /* 툴팁 스타일 */
+        .tooltip-inner {
+            max-width: 300px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        /* 방어구 부분 스타일 */
+        .armor-parts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .armor-part {
+            display: flex;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px 15px;
+            transition: all 0.2s ease;
+            border-left: 5px solid #20c997;
+        }
+
+        .armor-part:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .armor-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+
+        .armor-info {
+            flex: 1;
+        }
+
+        .armor-name {
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .armor-rank {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: white;
+            background-color: #6c757d;
+            margin-top: 4px;
+        }
+
+        .armor-rank.high-rank {
+            background-color: #0dcaf0;
+        }
+
+        .armor-rank.lucky {
+            background-color: #ff9500;  /* 더 진한 주황색 */
+            color: white;               /* 흰색 텍스트로 변경 */
+            font-weight: bold;          /* 굵게 표시 */
+            text-shadow: 0 0 2px #000;  /* 텍스트에 그림자 추가 */
+            animation: glow 1.5s infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 5px #ff9500;
+            }
+            to {
+                box-shadow: 0 0 15px #ff9500, 0 0 20px #ff5e00;
+            }
+        }
+
+        /* 헤더 커스텀 스타일 수정 */
+        .header-custom {
+            background: linear-gradient(135deg, rgba(51, 51, 51, 0.85) 0%, rgba(17, 17, 17, 0.85) 100%);
+            border-bottom: 5px solid #f8b400;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header-custom::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('/img/header-pattern.webp') center center;
+            background-size: cover;
+            opacity: 0.3;
+            z-index: 0;
+        }
+
+        .header-custom h1, .header-custom p {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
 </head>
 <body class="bg-light">
 <div class="container py-4">
@@ -14,11 +146,70 @@
     <header class="text-center mb-4">
         <div class="py-5 bg-dark text-white rounded shadow header-custom">
             <h1 class="display-4 fw-bold mb-3 korean-font">🎯 돌림판 가챠 시스템 🎯</h1>
-            <p class="lead korean-font">★ 몬스터헌터 무기 & 방어구 랜덤 추첨 ★</p>
+            <p class="lead korean-font">★ 몬스터헌터 무기 & 방어구 & 몬스터 랜덤 추첨 ★</p>
         </div>
     </header>
 
-    <!-- 닉네임 입력 필드 (디자인 개선) -->
+    <!-- 정보 패널 (항상 표시) -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i>시스템 정보</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- 몬스터 영향 설명 -->
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <h5><i class="fa-solid fa-dragon me-2 text-warning"></i>몬스터 영향</h5>
+                                <ul class="fs-6">
+                                    <li>부위별로 <strong>90% 하위</strong>, <strong>10% 상위</strong> 확률</li>
+                                    <li class="special-monster">특별 몬스터 : <strong>상위 방어구 2개 확정</strong>
+                                        <ul class="special-monsters-list">
+                                            <li>진 다하드</li>
+                                            <li>알슈베르도</li>
+                                            <li>고어 마가라</li>
+                                            <li>레 다우</li>
+                                            <li>우드투나</li>
+                                        </ul>
+                                    </li>
+                                    <li>일반 몬스터 : <strong>상위 방어구 1개 확정</strong></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 럭키 효과 설명 -->
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <h5><i class="fa-solid fa-star me-2 text-warning"></i>럭키 효과</h5>
+                                <ul class="fs-6">
+                                    <li>방어구 가챠 시 <strong>1% 확률</strong>로 럭키 효과 발동</li>
+                                    <li>럭키 효과 발동 시 <strong>원하는 방어구를 입을 수 있음</strong></li>
+                                    <li>방어구 뱃지에 <strong>✨</strong> 표시가 나타남</li>
+                                    <li>디스코드에 공유 시 <strong>LUCKY!</strong> 문구 표시</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- 기타 정보 -->
+                        <div class="col-md-4">
+                            <div class="info-box">
+                                <h5><i class="fa-solid fa-shield-halved me-2 text-success"></i>기타 정보</h5>
+                                <ul class="fs-6">
+                                    <li>모든 방어구는 <strong>호프셋</strong>으로 고정</li>
+                                    <li>몬스터 가챠 후 방어구/전체 가챠 실행 시 몬스터 효과 적용</li>
+                                    <li>리셋 버튼으로 모든 결과 초기화 가능</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 닉네임 입력 필드 -->
     <div class="row mb-4">
         <div class="col-md-6 mx-auto">
             <div class="card shadow">
@@ -48,23 +239,30 @@
 
     <!-- 컨트롤 버튼 -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-2">
+            <div class="d-grid">
+                <button id="randomMonsterBtn" class="btn btn-lg btn-warning shadow" data-bs-toggle="tooltip" title="몬스터를 먼저 뽑으면 방어구 등급에 영향을 줍니다">
+                    <i class="fa-solid fa-dragon me-2"></i>몬스터 가챠
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
             <div class="d-grid">
                 <button id="randomWeaponBtn" class="btn btn-lg btn-primary shadow">
                     <i class="fa-solid fa-khanda me-2"></i>무기 가챠
                 </button>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="d-grid">
-                <button id="randomArmorBtn" class="btn btn-lg btn-success shadow">
+                <button id="randomArmorBtn" class="btn btn-lg btn-success shadow" data-bs-toggle="tooltip" title="1% 확률로 럭키 효과 발동!">
                     <i class="fa-solid fa-shield-halved me-2"></i>방어구 가챠
                 </button>
             </div>
         </div>
         <div class="col-md-3">
             <div class="d-grid">
-                <button id="randomLoadoutBtn" class="btn btn-lg btn-danger shadow">
+                <button id="randomLoadoutBtn" class="btn btn-lg btn-danger shadow" data-bs-toggle="tooltip" title="무기와 방어구를 한번에 뽑습니다">
                     <i class="fa-solid fa-star me-2"></i>전체 가챠
                 </button>
             </div>
@@ -80,8 +278,38 @@
 
     <!-- 결과 섹션 -->
     <div class="row g-4">
+        <!-- 몬스터 결과 -->
+        <div class="col-md-4">
+            <div class="card shadow h-100">
+                <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fa-solid fa-dragon me-2"></i>몬스터</h3>
+                    <div class="monster-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>몬스터 선택 시:<br>• 특별 몬스터: 상위 방어구 2개 확정<br>• 일반 몬스터: 상위 방어구 1개 확정</div>">
+                        <i class="fa-solid fa-circle-info text-white"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 몬스터 결과 표시 -->
+                    <div id="monsterResult" style="display: none;">
+                        <div class="text-center mb-4">
+                            <h4 class="text-muted">선택된 몬스터</h4>
+                            <div class="display-4 fw-bold my-4 text-warning" id="monsterType"></div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <img id="monsterImage" class="img-fluid rounded" style="max-height: 200px;" alt="몬스터 이미지">
+                        </div>
+                    </div>
+
+                    <!-- 몬스터 비어있을 때 -->
+                    <div id="monsterEmpty" class="text-center py-5">
+                        <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+                        <p class="lead text-muted mt-3">몬스터 가챠를 실행해 주세요</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 무기 결과 -->
-        <div class="col-md-5">
+        <div class="col-md-4">
             <div class="card shadow h-100">
                 <div class="card-header bg-primary text-white">
                     <h3 class="mb-0"><i class="fa-solid fa-khanda me-2"></i>무기</h3>
@@ -94,7 +322,7 @@
                             <div class="display-4 fw-bold my-4 text-primary" id="weaponType"></div>
                         </div>
                         <div class="text-center mt-3">
-                            <img id="weaponImage" class="img-fluid" style="max-height: 200px;" alt="무기 이미지">
+                            <img id="weaponImage" class="img-fluid rounded" style="max-height: 200px;" alt="무기 이미지">
                         </div>
                     </div>
 
@@ -108,39 +336,76 @@
         </div>
 
         <!-- 방어구 결과 -->
-        <div class="col-md-7">
+        <div class="col-md-4">
             <div class="card shadow h-100">
-                <div class="card-header bg-success text-white">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                     <h3 class="mb-0"><i class="fa-solid fa-shield-halved me-2"></i>방어구</h3>
+                    <div class="armor-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>모든 방어구는 호프셋으로 고정됩니다.<br>럭키 효과가 발동되면 원하는 방어구를 입을 수 있습니다.</div>">
+                        <i class="fa-solid fa-circle-info text-white"></i>
+                    </div>
                 </div>
                 <div class="card-body">
                     <!-- 방어구 결과 표시 -->
                     <div id="armorResult" style="display: none;">
-                        <!-- 방어구 부위별 정보 -->
-                        <div class="row g-3">
-                            <div th:each="armorType : ${T(org.example.mhwilds.domain.Armor.ArmorType).values()}"
-                                 class="col-md-6">
-                                <div class="armor-piece p-3 rounded">
-                                    <h5 class="armor-title">
-                                        <span th:text="${armorType.korName}">부위</span>
-                                    </h5>
+                        <!-- 호프셋 표시 -->
+                        <div class="text-center mb-3">
+                            <span class="badge bg-success fs-6 mb-2">호프셋</span>
+                        </div>
 
-                                    <!-- 방어구 있을 때 -->
-                                    <div th:id="${armorType.name().toLowerCase()} + 'Info'" class="armor-info">
-                                        <div class="row g-0">
-                                            <div class="col-12">
-                                                <h6 th:id="${armorType.name().toLowerCase()} + 'FullName'" class="mb-2 text-primary"></h6>
-                                                <p class="mb-1"><strong>부위:</strong> <span th:id="${armorType.name().toLowerCase()} + 'Type'"></span></p>
-                                                <p class="mb-1"><strong>등급:</strong> <span th:id="${armorType.name().toLowerCase()} + 'Rank'" class="badge bg-secondary"></span></p>
-                                            </div>
-                                        </div>
-                                    </div>
+                        <!-- 방어구 부위 카드 -->
+                        <div class="armor-parts-container">
+                            <!-- 투구 -->
+                            <div class="armor-part">
+                                <div class="armor-icon">
+                                    <i class="fa-solid fa-helmet-safety"></i>
+                                </div>
+                                <div class="armor-info">
+                                    <div class="armor-name">투구</div>
+                                    <div class="armor-rank" id="headRank">하위</div>
+                                </div>
+                            </div>
 
-                                    <!-- 방어구 없을 때 -->
-                                    <div th:id="${armorType.name().toLowerCase()} + 'Empty'" class="armor-empty text-center py-4" style="display: none;">
-                                        <i class="fa-solid fa-minus text-muted"></i>
-                                        <p class="small text-muted mb-0">없음</p>
-                                    </div>
+                            <!-- 갑옷 -->
+                            <div class="armor-part">
+                                <div class="armor-icon">
+                                    <i class="fa-solid fa-shirt"></i>
+                                </div>
+                                <div class="armor-info">
+                                    <div class="armor-name">갑옷</div>
+                                    <div class="armor-rank" id="chestRank">하위</div>
+                                </div>
+                            </div>
+
+                            <!-- 팔보호구 -->
+                            <div class="armor-part">
+                                <div class="armor-icon">
+                                    <i class="fa-solid fa-hand"></i>
+                                </div>
+                                <div class="armor-info">
+                                    <div class="armor-name">팔보호구</div>
+                                    <div class="armor-rank" id="armRank">하위</div>
+                                </div>
+                            </div>
+
+                            <!-- 허리보호구 -->
+                            <div class="armor-part">
+                                <div class="armor-icon">
+                                    <i class="fa-solid fa-circle-dot"></i>
+                                </div>
+                                <div class="armor-info">
+                                    <div class="armor-name">허리보호구</div>
+                                    <div class="armor-rank" id="waistRank">하위</div>
+                                </div>
+                            </div>
+
+                            <!-- 다리보호구 -->
+                            <div class="armor-part">
+                                <div class="armor-icon">
+                                    <i class="fa-solid fa-socks"></i>
+                                </div>
+                                <div class="armor-info">
+                                    <div class="armor-name">다리보호구</div>
+                                    <div class="armor-rank" id="legRank">하위</div>
                                 </div>
                             </div>
                         </div>
@@ -154,6 +419,13 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 럭키 모드 테스트 버튼 (개발용, 숨김) -->
+    <div class="mt-4 text-center">
+        <button id="testLuckyBtn" class="btn btn-sm btn-outline-warning" style="display: none;">
+            <i class="fa-solid fa-wand-magic-sparkles me-2"></i>럭키 모드 테스트
+        </button>
     </div>
 
     <!-- 알림 토스트 -->
@@ -178,6 +450,37 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/lucky-effects.js"></script>
 <script src="/js/gacha.js"></script>
+
+<script>
+    // 툴팁 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // 개발자 모드: Shift + L 키를 누르면 럭키 테스트 버튼 표시
+        let shiftCount = 0;
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Shift') {
+                shiftCount++;
+                if (shiftCount >= 3) {
+                    document.getElementById('testLuckyBtn').style.display = 'inline-block';
+                    shiftCount = 0;
+                }
+                setTimeout(() => { shiftCount = 0; }, 1000);
+            }
+        });
+
+        // 럭키 테스트 버튼 이벤트
+        document.getElementById('testLuckyBtn').addEventListener('click', function() {
+            if (typeof testLuckyMode === 'function') {
+                testLuckyMode();
+            }
+        });
+    });
+</script>
 </body>
 </html>

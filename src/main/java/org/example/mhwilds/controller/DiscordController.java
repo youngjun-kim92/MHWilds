@@ -1,9 +1,9 @@
 package org.example.mhwilds.controller;
 
 import org.example.mhwilds.domain.Armor;
+import org.example.mhwilds.domain.Monster;
 import org.example.mhwilds.domain.Weapon;
 import org.example.mhwilds.service.DiscordService;
-import org.example.mhwilds.service.GachaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +22,10 @@ public class DiscordController {
 
     private static final Logger logger = LoggerFactory.getLogger(DiscordController.class);
     private final DiscordService discordService;
-    private final GachaService gachaService;
 
     @Autowired
-    public DiscordController(DiscordService discordService, GachaService gachaService) {
+    public DiscordController(DiscordService discordService) {
         this.discordService = discordService;
-        this.gachaService = gachaService;
     }
 
     /**
@@ -67,17 +65,11 @@ public class DiscordController {
                 }
             }
 
-            // 방어구 데이터 처리
+            // 방어구 데이터 처리 (단순화)
             Map<Armor.ArmorType, Armor.ArmorRank> armorRanks = new HashMap<>();
-            Map<String, String> armorNames = new HashMap<>();
 
             if (payload.containsKey("armor")) {
                 Map<String, Object> armorData = (Map<String, Object>) payload.get("armor");
-
-                // 방어구 이름 데이터 처리
-                if (payload.containsKey("armorNames")) {
-                    armorNames = (Map<String, String>) payload.get("armorNames");
-                }
 
                 for (Map.Entry<String, Object> entry : armorData.entrySet()) {
                     try {
@@ -86,12 +78,6 @@ public class DiscordController {
                             Map<String, String> rankData = (Map<String, String>) entry.getValue();
                             Armor.ArmorRank armorRank = Armor.ArmorRank.valueOf(rankData.get("name"));
                             armorRanks.put(armorType, armorRank);
-
-                            // 방어구 이름이 없으면 랜덤으로 생성
-                            if (!armorNames.containsKey(entry.getKey())) {
-                                String randomName = gachaService.drawRandomArmorName(armorType);
-                                armorNames.put(entry.getKey(), randomName);
-                            }
                         }
                     } catch (IllegalArgumentException e) {
                         logger.warn("Invalid armor type or rank: {}", entry.getKey());
@@ -99,8 +85,29 @@ public class DiscordController {
                 }
             }
 
+            // 몬스터 데이터 처리
+            Monster.MonsterType monsterType = null;
+            if (payload.containsKey("monster")) {
+                Map<String, String> monsterData = (Map<String, String>) payload.get("monster");
+                String monsterTypeName = monsterData.get("name");
+                if (monsterTypeName != null) {
+                    try {
+                        monsterType = Monster.MonsterType.valueOf(monsterTypeName);
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid monster type: {}", monsterTypeName);
+                    }
+                }
+            }
+
+            // 럭키 효과 확인
+            boolean isLucky = payload.containsKey("isLucky") && Boolean.TRUE.equals(payload.get("isLucky"));
+
+            logger.info("Processing gacha result - Type: {}, Monster: {}, Weapon: {}, Lucky: {}",
+                    type, monsterType, weaponType, isLucky);
+
             // 디스코드에 결과 전송
-            boolean success = discordService.sendGachaResultToDiscord(nickname, type, weaponType, armorRanks, armorNames);
+            boolean success = discordService.sendGachaResultToDiscord(
+                    nickname, type, weaponType, armorRanks, monsterType, isLucky);
 
             response.put("success", success);
             if (success) {

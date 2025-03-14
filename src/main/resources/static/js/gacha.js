@@ -1,8 +1,9 @@
-// 몬스터헌터 무기 & 방어구 가챠 시스템
+// 몬스터헌터 무기 & 방어구 & 몬스터 가챠 시스템
 document.addEventListener('DOMContentLoaded', function() {
     // 버튼 요소 가져오기
     const randomWeaponBtn = document.getElementById('randomWeaponBtn');
     const randomArmorBtn = document.getElementById('randomArmorBtn');
+    const randomMonsterBtn = document.getElementById('randomMonsterBtn');
     const randomLoadoutBtn = document.getElementById('randomLoadoutBtn');
     const resetBtn = document.getElementById('resetBtn');
 
@@ -17,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const weaponEmpty = document.getElementById('weaponEmpty');
     const armorResult = document.getElementById('armorResult');
     const armorEmpty = document.getElementById('armorEmpty');
+    const monsterResult = document.getElementById('monsterResult');
+    const monsterEmpty = document.getElementById('monsterEmpty');
 
     // Bootstrap 토스트 초기화
     const toast = new bootstrap.Toast(discordToast);
@@ -24,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 현재 결과 저장 변수
     let currentWeapon = null;
     let currentArmor = {};
-    let currentArmorNames = {}; // 방어구 이름 저장
+    let currentMonster = null;
 
     // 무기 종류 데이터
     const weaponTypes = [
@@ -44,115 +47,42 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: 'BOW', korName: '활' }
     ];
 
+    // 몬스터 종류 데이터
+    const monsterTypes = [
+        { name: 'CHATAKABURA', korName: '차타카브라' },
+        { name: 'KEMATRICE', korName: '케마트리스' },
+        { name: 'LAVASIOTH', korName: '라바라 바리나' },
+        { name: 'BABAKONGA', korName: '바바콩가' },
+        { name: 'BALAHARAH', korName: '발라하라' },
+        { name: 'DODOGAMA', korName: '도샤구마' },
+        { name: 'WOODTUNA', korName: '우드투나' },
+        { name: 'PUFUROPHORU', korName: '푸푸로포루' },
+        { name: 'RADAU', korName: '레 다우' },
+        { name: 'NERSCULA', korName: '네르스큐라' },
+        { name: 'HIRABAMI', korName: '히라바미' },
+        { name: 'AZARACAN', korName: '아자라칸' },
+        { name: 'NUIGDORA', korName: '누 이그드라' },
+        { name: 'DODOGAMA_ELDER', korName: '수호룡 도샤구마' },
+        { name: 'RATHALOS_ELDER', korName: '수호룡 리오레우스' },
+        { name: 'TRUE_DAHARD', korName: '진 다하드' },
+        { name: 'ODOGARON_VARIANT', korName: '수호룡 오도가론 아종' },
+        { name: 'SHIEU', korName: '시이우' },
+        { name: 'YANKUK', korName: '얀쿡크' },
+        { name: 'GENPREY', korName: '게리오스' },
+        { name: 'RATHIAN', korName: '리오레이아' },
+        { name: 'ANJANATH_VARIANT', korName: '수호룡 안쟈나프 아종' },
+        { name: 'RATHALOS', korName: '리오레우스' },
+        { name: 'GRAVIMOS', korName: '그라비모스' },
+        { name: 'BLANGONGA', korName: '도도블랑고' },
+        { name: 'GORE_MAGALA', korName: '고어 마가라' },
+        { name: 'ALSUVERDE', korName: '알슈베르도' }
+    ];
+
     // 방어구 등급 데이터
     const armorRanks = [
         { name: 'LOW_RANK', korName: '하위' },
         { name: 'HIGH_RANK', korName: '상위' }
     ];
-
-    // 하위 방어구 부위별 이름 데이터 (실제 게임 데이터)
-    const lowRankArmorNames = {
-        'HEAD': [
-            '투나물헬름', '레다젤트헬름', '이그졸스헬름', '호벽수헬름', '호화룡헬름',
-            '호흉조룡헬름', '시이우헬름', '호쇄인룡헬름', '잉곳헬름', '네라치카액세서리',
-            '푸포루헬름', '스큐라헬름', '히라바미헬름', '아자라헬름', '콩가헬름',
-            '발라헬름', '도샤구마헬름', '호프마스크', '레더헤드', '체인헤드',
-            '본헬름', '브라치카글라스', '차타헬름', '트리스헬름', '얼로이헬름',
-            '랑고헬름', '라바라헬름'
-        ],
-        'CHEST': [
-            '투나물메일', '레다젤트메일', '이그졸스메일', '호벽수메일', '호화룡메일',
-            '호흉조룡메일', '시이우메일', '호쇄인룡메일', '잉곳메일', '크라노다스메일',
-            '푸포루메일', '스큐라메일', '히라바미메일', '아자라메일', '콩가메일',
-            '발라메일', '도샤구마메일', '호프메일', '레더베스트', '체인베스트',
-            '본메일', '차타메일', '트리스메일', '얼로이메일', '랑고메일',
-            '라바라메일'
-        ],
-        'ARM': [
-            '투나물암', '레다젤트암', '이그졸스암', '호벽수암', '호화룡암',
-            '호흉조룡암', '시이우암', '호쇄인룡암', '잉곳암', '푸포루암',
-            '스큐라암', '히라바미암', '아자라암', '콩가암', '발라암',
-            '도샤구마암', '호프암', '레더글러브', '체인글러브', '본암',
-            '탈리오스암', '차타암', '트리스암', '얼로이암', '랑고암',
-            '라바라암'
-        ],
-        'WAIST': [
-            '수호룡 세크레트코일', '투나물코일', '레다젤트코일', '이그졸스코일', '호벽수코일',
-            '호화룡코일', '호흉조룡코일', '시이우코일', '호쇄인룡코일', '잉곳코일',
-            '푸포루코일', '스큐라코일', '히라바미코일', '아자라코일', '콩가코일',
-            '발라코일', '도샤구마코일', '호프코일', '레더벨트', '체인벨트',
-            '본코일', '차타코일', '트리스코일', '얼로이코일', '랑고코일',
-            '라바라코일'
-        ],
-        'LEG': [
-            '투나물그리브', '레다젤트그리브', '이그졸스그리브', '호벽수그리브', '호화룡그리브',
-            '호흉조룡그리브', '시이우그리브', '호쇄인룡그리브', '잉곳그리브', '푸포루그리브',
-            '스큐라그리브', '히라바미그리브', '아자라그리브', '콩가그리브', '발라그리브',
-            '도샤구마그리브', '호프그리브', '레더팬츠', '체인팬츠', '본그리브',
-            '가쟈우부츠', '차타그리브', '트리스그리브', '얼로이그리브', '필라길그리브',
-            '랑고그리브', '라바라그리브'
-        ]
-    };
-
-    // 상위 방어구 부위별 이름 데이터 (α/β 구분)
-    // 첫 번째 요소는 이름, 두 번째 요소는 β가 있는지 여부 (true면 α/β 둘 다 있음, false면 α만 있음)
-    const highRankArmorNames = {
-        'HEAD': [
-            ['슈바르카헬름', true], ['호쇄인룡헬름', true], ['길드에이스피어스', false], ['용왕의 척안', false],
-            ['도베르헬름', false], ['다마스크헬름', false], ['다하딜라헬름', true], ['투나물헬름', true],
-            ['레다젤트헬름', true], ['이그졸스헬름', true], ['고어헬름', true], ['하이메탈헬름', false],
-            ['배틀헬름', false], ['멜호아프롤', false], ['조사단헬름', false], ['잉곳헬름', false],
-            ['호뢰악룡헬름', true], ['도샤구마헬름', true], ['호벽수헬름', true], ['아자라헬름', true],
-            ['호흉조룡헬름', true], ['시이우헬름', true], ['레우스헬름', true], ['호화룡헬름', true],
-            ['그라비드헬름', true], ['블랑고헬름', true], ['아티어헬름', false], ['쿠나파헤드', false],
-            ['아즈즈헤드', false], ['실드후드', false], ['데스기어게힐', false], ['파피메르테스타', false],
-            ['킹비트테스타', false], ['발라헬름', true], ['히라바미헬름', true], ['꽃성성이', false],
-            ['조사대의 귀걸이', false], ['레이아헬름', true]
-        ],
-        'CHEST': [
-            ['슈바르카메일', true], ['호쇄인룡메일', true], ['길드에이스메일', false], ['도베르메일', false],
-            ['다마스크메일', false], ['다하딜라메일', true], ['투나물메일', true], ['레다젤트메일', true],
-            ['이그졸스메일', true], ['고어메일', true], ['하이메탈메일', false], ['배틀메일', false],
-            ['멜호아토론코', false], ['조사단메일', false], ['잉곳메일', false], ['호뢰악룡메일', true],
-            ['도샤구마메일', true], ['호벽수메일', true], ['아자라메일', true], ['호흉조룡메일', true],
-            ['시이우메일', true], ['레우스메일', true], ['호화룡메일', true], ['그라비드메일', true],
-            ['블랑고메일', true], ['아티어메일', false], ['쿠나파케이프', false], ['아즈즈에이프런', false],
-            ['실드코트', false], ['데스기어무스켈', false], ['파피메르페트', false], ['킹비트페트', false],
-            ['발라메일', true], ['히라바미메일', true], ['레이아메일', true]
-        ],
-        'ARM': [
-            ['슈바르카암', true], ['호쇄인룡암', true], ['길드에이스암', false], ['도베르암', false],
-            ['다마스크암', false], ['다하딜라암', true], ['투나물암', true], ['레다젤트암', true],
-            ['이그졸스암', true], ['고어암', true], ['하이메탈암', false], ['배틀암', false],
-            ['멜호아라마', false], ['조사단암', false], ['잉곳암', false], ['호뢰악룡암', true],
-            ['도샤구마암', true], ['호벽수암', true], ['아자라암', true], ['호흉조룡암', true],
-            ['시이우암', true], ['레우스암', true], ['호화룡암', true], ['그라비드암', true],
-            ['블랑고암', true], ['아티어암', false], ['데스기어파오스트', false], ['파피메르마노', false],
-            ['킹비트마노', false], ['발라암', true], ['히라바미암', true], ['레이아암', true]
-        ],
-        'WAIST': [
-            ['슈바르카코일', true], ['호쇄인룡코일', true], ['길드에이스코일', false], ['도베르코일', false],
-            ['다마스크코일', false], ['다하딜라코일', true], ['투나물코일', true], ['레다젤트코일', true],
-            ['이그졸스코일', true], ['고어코일', true], ['하이메탈코일', false], ['배틀코일', false],
-            ['멜호아오하', false], ['조사단코일', false], ['잉곳코일', false], ['수호룡 세크레트코일', true],
-            ['호뢰악룡코일', true], ['도샤구마코일', true], ['호벽수코일', true], ['아자라코일', true],
-            ['호흉조룡코일', true], ['시이우코일', true], ['레우스코일', true], ['호화룡코일', true],
-            ['그라비드코일', true], ['블랑고코일', true], ['스자의 허리띠', false], ['아티어코일', false],
-            ['쿠나파벨트', false], ['데스기어네이블', false], ['파피메르앙카', false], ['킹비트앙카', false],
-            ['스큐라코일', true], ['발라코일', true], ['히라바미코일', true], ['레이아코일', true]
-        ],
-        'LEG': [
-            ['슈바르카그리브', true], ['호쇄인룡그리브', true], ['길드에이스부츠', false], ['도베르그리브', false],
-            ['다마스크그리브', false], ['다하딜라그리브', true], ['투나물그리브', true], ['레다젤트그리브', true],
-            ['이그졸스그리브', true], ['고어그리브', true], ['하이메탈그리브', false], ['배틀그리브', false],
-            ['멜호아라이스', false], ['조사단그리브', false], ['잉곳그리브', false], ['가쟈우부츠', false],
-            ['호뢰악룡그리브', true], ['도샤구마그리브', true], ['호벽수그리브', true], ['아자라그리브', true],
-            ['호흉조룡그리브', true], ['시이우그리브', true], ['레우스그리브', true], ['호화룡그리브', true],
-            ['그라비드그리브', true], ['블랑고그리브', true], ['아티어그리브', false], ['쿠나파챕스', false],
-            ['아즈즈팬츠', false], ['데스기어페르제', false], ['파피메르감바', false], ['킹비트감바', false],
-            ['스큐라그리브', true], ['발라그리브', true], ['히라바미그리브', true], ['레이아그리브', true]
-        ]
-    };
 
     // 저장된 닉네임 불러오기
     const savedNickname = localStorage.getItem('mhGachaNickname');
@@ -200,18 +130,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // 방어구 가챠 버튼 클릭 이벤트
     randomArmorBtn.addEventListener('click', function() {
-        // 방어구 랜덤 선택
-        const randomArmor = getRandomArmor();
-        currentArmor = randomArmor;
-        currentArmorNames = {}; // 방어구 이름 초기화
-        displayArmor(randomArmor);
+        // 방어구 랜덤 선택 (몬스터 영향 반영)
+        const result = getRandomArmor();
+        currentArmor = result.armorSet;
+        const isLucky = result.isLucky;
 
-        console.log("방어구 가챠 결과:", currentArmor);
-        console.log("방어구 이름:", currentArmorNames);
+        displayArmor(currentArmor, isLucky);
+
+        console.log("방어구 가챠 결과:", currentArmor, "럭키:", isLucky);
 
         // 디스코드 공유 체크 확인
         if(shareToDiscordCheckbox.checked && nicknameInput.value.trim() !== '') {
-            shareResultToDiscord('armor');
+            shareResultToDiscord('armor', isLucky);
+        }
+    });
+
+    // 몬스터 가챠 버튼 클릭 이벤트
+    randomMonsterBtn.addEventListener('click', function() {
+        // 몬스터 랜덤 선택
+        const randomMonster = getRandomMonster();
+        currentMonster = randomMonster;
+        displayMonster(randomMonster);
+
+        console.log("몬스터 가챠 결과:", currentMonster);
+
+        // 디스코드 공유 체크 확인
+        if(shareToDiscordCheckbox.checked && nicknameInput.value.trim() !== '') {
+            shareResultToDiscord('monster');
         }
     });
 
@@ -219,22 +164,21 @@ document.addEventListener('DOMContentLoaded', function() {
     randomLoadoutBtn.addEventListener('click', function() {
         // 무기 및 방어구 랜덤 선택
         const randomWeapon = getRandomWeapon();
-        const randomArmor = getRandomArmor();
+        const result = getRandomArmor();
+        const isLucky = result.isLucky;
 
         currentWeapon = randomWeapon;
-        currentArmor = randomArmor;
-        currentArmorNames = {}; // 방어구 이름 초기화
+        currentArmor = result.armorSet;
 
         displayWeapon(randomWeapon);
-        displayArmor(randomArmor);
+        displayArmor(currentArmor, isLucky);
 
         console.log("전체 가챠 결과 - 무기:", currentWeapon);
-        console.log("전체 가챠 결과 - 방어구:", currentArmor);
-        console.log("방어구 이름:", currentArmorNames);
+        console.log("전체 가챠 결과 - 방어구:", currentArmor, "럭키:", isLucky);
 
         // 디스코드 공유 체크 확인
         if(shareToDiscordCheckbox.checked && nicknameInput.value.trim() !== '') {
-            shareResultToDiscord('loadout');
+            shareResultToDiscord('loadout', isLucky);
         }
     });
 
@@ -248,51 +192,94 @@ document.addEventListener('DOMContentLoaded', function() {
         return weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
     }
 
-    // 랜덤 방어구 선택 함수
-    function getRandomArmor() {
-        const result = {};
-
-        // 각 부위별로 70% 확률로 방어구 선택
-        for (const armorType of Object.keys(lowRankArmorNames)) {
-            if (Math.random() <= 0.7) {
-                const randomRank = armorRanks[Math.floor(Math.random() * armorRanks.length)];
-                result[armorType] = randomRank;
-            }
-        }
-
-        return result;
+    // 랜덤 몬스터 선택 함수
+    function getRandomMonster() {
+        return monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
     }
 
-    // 방어구 이름 생성 함수 - 등급에 따라 다른 풀에서 선택 및 알파/베타 처리
-    function generateArmorName(armorType, armorRank) {
-        if (armorRank.name === 'HIGH_RANK') {
-            // 상위 방어구인 경우
-            const namesPool = highRankArmorNames[armorType];
-            if (!namesPool || namesPool.length === 0) {
-                return `랜덤${getArmorTypeShortName(armorType)}`;
-            }
+    // 랜덤 방어구 선택 함수 (몬스터 영향 추가 - 확률 로직 개선)
+    function getRandomArmor(forceLucky = false) {
+        // 결과 객체 초기화
+        const armorSet = {};
 
-            // 랜덤으로 방어구 선택
-            const randomIndex = Math.floor(Math.random() * namesPool.length);
-            const [baseName, hasBeta] = namesPool[randomIndex];
+        // 럭키 효과는 1% 확률로 발동, 또는 테스트 모드에서 강제 적용
+        let isLucky = forceLucky || Math.random() <= 0.01;
 
-            // 베타 버전이 있는 경우, 알파/베타 랜덤 결정
-            if (hasBeta) {
-                return baseName + (Math.random() < 0.5 ? 'α' : 'β');
-            } else {
-                // 베타 버전이 없는 경우 알파만 추가
-                return baseName + 'α';
-            }
-        } else {
-            // 하위 방어구인 경우 (α/β 표기 없음)
-            const namesPool = lowRankArmorNames[armorType];
-            if (!namesPool || namesPool.length === 0) {
-                return `랜덤${getArmorTypeShortName(armorType)}`;
-            }
-
-            // 랜덤으로 방어구 선택 (표기 없이 기본 이름만)
-            return namesPool[Math.floor(Math.random() * namesPool.length)];
+        // 럭키 효과 발동 시 화려한 효과 표시
+        if (isLucky && typeof showLuckyEffect === 'function') {
+            showLuckyEffect();
         }
+
+        // 몬스터가 선택되었는지 확인
+        const hasSelectedMonster = currentMonster !== null;
+
+        // 특별 상위 방어구 2개 확정 나오는 몬스터 목록
+        const specialMonsters = ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA'];
+
+        // 몬스터가 선택되었고 특별 몬스터인 경우
+        const isSpecialMonster = hasSelectedMonster && specialMonsters.includes(currentMonster.name);
+
+        // 기본 상위 방어구 개수 결정
+        let baseHighRankCount = 0;
+        if (hasSelectedMonster) {
+            if (isSpecialMonster) {
+                // 특별 몬스터: 2개 확정
+                baseHighRankCount = 2;
+            } else {
+                // 일반 몬스터: 1개 확정
+                baseHighRankCount = 1;
+            }
+        }
+
+        // 추가 상위 방어구 개수 결정 (최대 5개까지 - 모든 부위)
+        let extraHighRankCount = 0;
+        let chance = 0.1; // 10% 확률
+
+        // 5개 부위까지 각각 10% 확률로 상위 방어구 추가 시도
+        for (let i = baseHighRankCount; i < 5; i++) {
+            if (Math.random() <= chance) {
+                extraHighRankCount++;
+            } else {
+                break; // 확률을 통과하지 못하면 중단
+            }
+        }
+
+        // 최종 상위 방어구 개수
+        const totalHighRankCount = Math.min(baseHighRankCount + extraHighRankCount, 5);
+
+        // 방어구 부위 목록
+        const armorTypes = ['HEAD', 'CHEST', 'ARM', 'WAIST', 'LEG'];
+
+        // 기본적으로 모든 부위를 하위 등급으로 설정
+        for (const type of armorTypes) {
+            armorSet[type] = armorRanks[0]; // 하위 등급
+        }
+
+        // 상위 등급 적용 (랜덤하게 부위 선택)
+        if (totalHighRankCount > 0) {
+            // 랜덤하게 순서 섞기
+            const shuffledTypes = [...armorTypes];
+            for (let i = shuffledTypes.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledTypes[i], shuffledTypes[j]] = [shuffledTypes[j], shuffledTypes[i]];
+            }
+
+            // 필요한 수만큼 상위 등급으로 변경
+            for (let i = 0; i < totalHighRankCount; i++) {
+                armorSet[shuffledTypes[i]] = armorRanks[1]; // 상위 등급
+            }
+        }
+
+        // 결과 로그
+        const highCount = Object.values(armorSet).filter(rank => rank.name === 'HIGH_RANK').length;
+        const lowCount = Object.values(armorSet).filter(rank => rank.name === 'LOW_RANK').length;
+        console.log(`방어구 구성: 기본 상위 ${baseHighRankCount}개, 추가 상위 ${extraHighRankCount}개, 최종 상위 ${highCount}개, 하위 ${lowCount}개, 럭키: ${isLucky}`);
+        console.log(`몬스터 선택됨: ${hasSelectedMonster}, 특별 몬스터: ${isSpecialMonster}`);
+
+        return {
+            armorSet: armorSet,
+            isLucky: isLucky
+        };
     }
 
     // 무기 정보 화면에 표시
@@ -317,7 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
         weaponImage.onerror = function() {
             // 이미지 로드 실패 시 기본 이미지 또는 숨김 처리
             this.src = '/img/weapons/default.jpg'; // 기본 이미지 경로
-            // 또는 이미지를 숨길 경우: this.style.display = 'none';
         };
 
         // 이미지 요소 표시
@@ -328,52 +314,96 @@ document.addEventListener('DOMContentLoaded', function() {
         weaponEmpty.style.display = 'none';
     }
 
-    // 방어구 정보 화면에 표시
-    function displayArmor(armorRanks) {
+    // 몬스터 정보 화면에 표시
+    function displayMonster(monsterType) {
+        if (!monsterType) {
+            monsterResult.style.display = 'none';
+            monsterEmpty.style.display = 'block';
+            return;
+        }
+
+        // 몬스터 이름 표시
+        document.getElementById('monsterType').textContent = monsterType.korName;
+
+        // 몬스터 이미지 표시
+        const monsterImage = document.getElementById('monsterImage');
+        const imagePath = `/img/monsters/${monsterType.name}.webp`; // 몬스터 이름과 동일한 이미지 파일명, 확장자는 webp
+
+        // 이미지 경로 설정
+        monsterImage.src = imagePath;
+
+        // 이미지 로드 에러 처리
+        monsterImage.onerror = function() {
+            // 이미지 로드 실패 시 기본 이미지 또는 숨김 처리
+            this.src = '/img/monsters/default.webp'; // 기본 이미지 경로도 webp
+        };
+
+        // 이미지 요소 표시
+        monsterImage.style.display = 'inline-block';
+
+        // 몬스터 섹션 표시
+        monsterResult.style.display = 'block';
+        monsterEmpty.style.display = 'none';
+    }
+
+    // 방어구 정보 화면에 표시 (럭키 효과 추가)
+    function displayArmor(armorRanks, isLucky = false) {
         if (!armorRanks || Object.keys(armorRanks).length === 0) {
             armorResult.style.display = 'none';
             armorEmpty.style.display = 'block';
             return;
         }
 
-        // 모든 방어구 부위의 기본 상태 설정
-        const armorTypes = ['head', 'chest', 'arm', 'waist', 'leg'];
-        armorTypes.forEach(type => {
-            document.getElementById(`${type}Info`).style.display = 'none';
-            document.getElementById(`${type}Empty`).style.display = 'block';
-        });
-
-        // 각 방어구 부위 표시
-        for (const [armorType, armorRank] of Object.entries(armorRanks)) {
-            if (!armorRank) continue;
-
-            const type = getTypeFromEnum(armorType).toLowerCase();
-
-            // 방어구 이름 생성 및 저장
-            const armorName = generateArmorName(armorType, armorRank);
-            currentArmorNames[armorType] = armorName;
-
-            // 방어구 이름 표시
-            document.getElementById(`${type}FullName`).textContent = armorName;
-
-            // 방어구 정보 표시
-            document.getElementById(`${type}Type`).textContent = getArmorTypeName(armorType);
-
-            // 등급 표시
-            document.getElementById(`${type}Rank`).textContent = armorRank.korName;
-
-            // 정보 표시 전환
-            document.getElementById(`${type}Info`).style.display = 'block';
-            document.getElementById(`${type}Empty`).style.display = 'none';
-        }
-
         // 방어구 섹션 표시
         armorResult.style.display = 'block';
         armorEmpty.style.display = 'none';
+
+        // 모든 방어구 등급 초기화
+        const rankElements = ['headRank', 'chestRank', 'armRank', 'waistRank', 'legRank'];
+        rankElements.forEach(id => {
+            const element = document.getElementById(id);
+            element.textContent = '하위';
+            element.classList.remove('high-rank', 'lucky');
+        });
+
+        // 부위별 매핑
+        const typeMapping = {
+            'HEAD': 'headRank',
+            'CHEST': 'chestRank',
+            'ARM': 'armRank',
+            'WAIST': 'waistRank',
+            'LEG': 'legRank'
+        };
+
+        // 럭키 효과 적용 (모든 방어구에 적용)
+        if (isLucky) {
+            rankElements.forEach(id => {
+                const element = document.getElementById(id);
+                element.textContent = '럭키 ✨';
+                element.classList.add('lucky');
+            });
+            return;
+        }
+
+        // 일반 효과 (럭키 아님)
+        Object.entries(armorRanks).forEach(([type, rank]) => {
+            const elementId = typeMapping[type];
+            if (!elementId) return;
+
+            const rankElement = document.getElementById(elementId);
+
+            // 등급 표시
+            rankElement.textContent = rank.korName;
+
+            // 상위 등급인 경우 클래스 추가
+            if (rank.name === 'HIGH_RANK') {
+                rankElement.classList.add('high-rank');
+            }
+        });
     }
 
-    // 디스코드에 결과 공유 함수
-    function shareResultToDiscord(type) {
+    // 디스코드에 결과 공유 함수 (럭키 효과 추가)
+    function shareResultToDiscord(type, isLucky = false) {
         const nickname = nicknameInput.value.trim();
         if (!nickname) {
             discordToastMessage.textContent = '닉네임을 입력해주세요!';
@@ -384,7 +414,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // 결과 데이터 생성
         let resultData = {
             nickname: nickname,
-            type: type
+            type: type,
+            isLucky: isLucky
         };
 
         // 무기 결과가 있으면 추가
@@ -395,14 +426,18 @@ document.addEventListener('DOMContentLoaded', function() {
         // 방어구 결과가 있으면 추가
         if (Object.keys(currentArmor).length > 0) {
             resultData.armor = currentArmor;
-            resultData.armorNames = currentArmorNames; // 방어구 이름 추가
+        }
+
+        // 몬스터 결과가 있으면 추가
+        if (currentMonster) {
+            resultData.monster = currentMonster;
         }
 
         // 디버깅 로그
         console.log("전송할 데이터:", resultData);
 
         // 공유할 결과가 없으면 중단
-        if (!resultData.weapon && Object.keys(currentArmor).length === 0) {
+        if (!resultData.weapon && Object.keys(currentArmor).length === 0 && !resultData.monster) {
             discordToastMessage.textContent = '공유할 결과가 없습니다!';
             toast.show();
             return;
@@ -449,32 +484,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return armorTypeNames[armorType] || armorType;
     }
 
-    // 방어구 타입 열거형에서 표시용 문자열로 변환
-    function getTypeFromEnum(enumType) {
-        const typeMap = {
-            'HEAD': 'head',
-            'CHEST': 'chest',
-            'ARM': 'arm',
-            'WAIST': 'waist',
-            'LEG': 'leg'
-        };
-
-        return typeMap[enumType] || enumType.toLowerCase();
-    }
-
-    // 방어구 타입의 짧은 이름 가져오기 (방어구 이름용)
-    function getArmorTypeShortName(armorType) {
-        const armorTypeShortNames = {
-            'HEAD': '헬름',
-            'CHEST': '메일',
-            'ARM': '암즈',
-            'WAIST': '코일',
-            'LEG': '그리브'
-        };
-
-        return armorTypeShortNames[armorType] || '';
-    }
-
     // 모든 결과 초기화
     function resetAll() {
         // 무기 초기화
@@ -486,6 +495,10 @@ document.addEventListener('DOMContentLoaded', function() {
         armorResult.style.display = 'none';
         armorEmpty.style.display = 'block';
         currentArmor = {};
-        currentArmorNames = {};
+
+        // 몬스터 초기화
+        monsterResult.style.display = 'none';
+        monsterEmpty.style.display = 'block';
+        currentMonster = null;
     }
 });

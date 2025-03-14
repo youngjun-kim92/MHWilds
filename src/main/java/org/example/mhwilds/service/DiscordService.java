@@ -1,6 +1,7 @@
 package org.example.mhwilds.service;
 
 import org.example.mhwilds.domain.Armor;
+import org.example.mhwilds.domain.Monster;
 import org.example.mhwilds.domain.Weapon;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,36 +23,36 @@ public class DiscordService {
 
     private static final Logger logger = LoggerFactory.getLogger(DiscordService.class);
     private final RestTemplate restTemplate;
-    private final GachaService gachaService;  // 방어구 이름을 가져오기 위한 서비스 추가
 
     @Value("${discord.webhook.url}")
     private String discordWebhookUrl;
 
-    public DiscordService(GachaService gachaService) {
+    public DiscordService() {
         this.restTemplate = new RestTemplate();
-        this.gachaService = gachaService;
     }
 
     /**
-     * 디스코드 웹훅을 통해 가챠 결과를 전송
+     * 디스코드 웹훅을 통해 가챠 결과를 전송 (몬스터 및 럭키 효과 추가)
      * @param nickname 사용자 닉네임
-     * @param gachaType 가챠 유형 (weapon, armor, loadout)
+     * @param gachaType 가챠 유형 (weapon, armor, monster, loadout)
      * @param weaponType 무기 유형 (null일 수 있음)
      * @param armorRanks 방어구 등급 맵 (null일 수 있음)
-     * @param armorNames 방어구 이름 맵 (null일 수 있음)
+     * @param monsterType 몬스터 타입 (null일 수 있음)
+     * @param isLucky 럭키 효과 적용 여부
      * @return 성공 여부
      */
     public boolean sendGachaResultToDiscord(String nickname, String gachaType,
                                             Weapon.WeaponType weaponType,
                                             Map<Armor.ArmorType, Armor.ArmorRank> armorRanks,
-                                            Map<String, String> armorNames) {
+                                            Monster.MonsterType monsterType,
+                                            boolean isLucky) {
         try {
             // 헤더 설정
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            // 메시지 내용 생성
-            String content = buildDiscordMessage(nickname, gachaType, weaponType, armorRanks, armorNames);
+            // 메시지 내용 생성 (몬스터 및 럭키 효과 포함)
+            String content = buildDiscordMessage(nickname, gachaType, weaponType, armorRanks, monsterType, isLucky);
 
             // 메시지 객체 생성
             Map<String, Object> discordMessage = new HashMap<>();
@@ -78,19 +79,24 @@ public class DiscordService {
     }
 
     /**
-     * 디스코드에 보낼 메시지 본문 생성
+     * 디스코드에 보낼 메시지 본문 생성 (몬스터 및 럭키 효과 포함)
      */
     private String buildDiscordMessage(String nickname, String gachaType,
                                        Weapon.WeaponType weaponType,
                                        Map<Armor.ArmorType, Armor.ArmorRank> armorRanks,
-                                       Map<String, String> armorNames) {
+                                       Monster.MonsterType monsterType,
+                                       boolean isLucky) {
 
         StringBuilder message = new StringBuilder();
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // 헤더 추가
-        message.append("**:game_die: 몬스터헌터 가챠 결과 :game_die:**\n");
+        // 헤더 추가 (럭키 효과 포함)
+        if (isLucky) {
+            message.append("**:game_die: 몬스터헌터 가챠 결과 :sparkles: 초★러키!!! :sparkles:**\n");
+        } else {
+            message.append("**:game_die: 몬스터헌터 가챠 결과 :game_die:**\n");
+        }
         message.append("> **닉네임**: ").append(nickname).append("\n");
         message.append("> **시간**: ").append(now.format(formatter)).append("\n");
 
@@ -102,6 +108,9 @@ public class DiscordService {
                 break;
             case "armor":
                 message.append("방어구 가챠\n\n");
+                break;
+            case "monster":
+                message.append("몬스터 가챠\n\n");
                 break;
             case "loadout":
                 message.append("전체 가챠\n\n");
@@ -116,41 +125,48 @@ public class DiscordService {
             message.append("> ").append(weaponType.getKorName()).append("\n\n");
         }
 
-        // 방어구 정보 추가
+        // 방어구 정보 추가 (럭키 효과 간소화)
         if (armorRanks != null && !armorRanks.isEmpty()) {
             message.append("**:shield: 방어구**\n");
 
-            // 각 부위별 정보 추가
-            for (Armor.ArmorType type : Armor.ArmorType.values()) {
-                message.append("> **").append(type.getKorName()).append("**: ");
+            if (isLucky) {
+                // 럭키 효과 발동 시 간단한 메시지만 표시
+                message.append("> **원하는 방어구 착용하세요** :sparkles:\n\n");
+            } else {
+                // 일반 효과 시 각 부위 정보 표시
+                for (Armor.ArmorType type : Armor.ArmorType.values()) {
+                    message.append("> **").append(type.getKorName()).append("**: ");
 
-                if (armorRanks.containsKey(type)) {
-                    Armor.ArmorRank rank = armorRanks.get(type);
-                    String typeName = type.name(); // HEAD, CHEST 등
-                    String armorName = "없음";
-
-                    // 방어구 이름이 전달되었으면 사용
-                    if (armorNames != null && armorNames.containsKey(typeName)) {
-                        armorName = armorNames.get(typeName);
+                    if (armorRanks.containsKey(type)) {
+                        Armor.ArmorRank rank = armorRanks.get(type);
+                        message.append(rank.getKorName()).append(" 등급\n");
                     } else {
-                        // 이름이 전달되지 않았으면 랜덤으로 생성
-                        armorName = gachaService.drawRandomArmorName(type);
+                        message.append("없음\n");
                     }
-
-                    message.append(armorName).append(" (").append(rank.getKorName()).append(" 등급)\n");
-                } else {
-                    message.append("없음\n");
                 }
             }
+        }
+
+        // 몬스터 정보 추가
+        if (monsterType != null) {
+            message.append("\n**:dragon: 몬스터**\n");
+            message.append("> ").append(monsterType.getKorName()).append("\n");
         }
 
         return message.toString();
     }
 
-    // 오버로딩된 메서드 - 이전 버전과의 호환성 유지
+    // 오버로딩된 메소드들 (기존 메소드와의 호환성 유지)
+    public boolean sendGachaResultToDiscord(String nickname, String gachaType,
+                                            Weapon.WeaponType weaponType,
+                                            Map<Armor.ArmorType, Armor.ArmorRank> armorRanks,
+                                            Monster.MonsterType monsterType) {
+        return sendGachaResultToDiscord(nickname, gachaType, weaponType, armorRanks, monsterType, false);
+    }
+
     public boolean sendGachaResultToDiscord(String nickname, String gachaType,
                                             Weapon.WeaponType weaponType,
                                             Map<Armor.ArmorType, Armor.ArmorRank> armorRanks) {
-        return sendGachaResultToDiscord(nickname, gachaType, weaponType, armorRanks, null);
+        return sendGachaResultToDiscord(nickname, gachaType, weaponType, armorRanks, null, false);
     }
 }
