@@ -1,0 +1,24 @@
+name: Build and Deploy to Render
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치에 푸시될 때 실행
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: your-registry/your-image:latest
+          
+      - name: Deploy to Render
+        uses: JorgeLNJunior/render-deploy@v1
+        with:
+          service_id: ${{ secrets.RENDER_SERVICE_ID }}
+          api_key: ${{ secrets.RENDER_API_KEY }}
