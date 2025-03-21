@@ -133,19 +133,16 @@
     color: #033b43; /* 가장 진한 파란색 */
 }
 
-.lucky-feature {
-    background: rgba(255, 193, 7, 0.1);
-    border-left: 3px solid #ffc107;
+/* 중요 강조 텍스트 (붉은색) */
+.red-emphasis {
+    color: #b82e2e; /* 적당한 붉은색 - 너무 쨍하지 않은 색상 */
+    font-weight: 700;
 }
 
-.lucky-feature:hover {
-    background: rgba(255, 193, 7, 0.2);
-}
-
+/* 럭키 확률 텍스트 */
 .luck-chance {
     font-weight: 700;
-    color: #fd7e14;
-    animation: pulseText 2s infinite;
+    color: #033b43; /* 가장 진한 파란색으로 변경 */
 }
 
 /* 결과 컨테이너에 페이드인 애니메이션 추가 */
@@ -198,19 +195,6 @@
     to {
         opacity: 1;
         transform: translateY(0);
-    }
-}
-
-@keyframes pulseText {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-        text-shadow: 0 0 5px rgba(253, 126, 20, 0.7);
-    }
-    100% {
-        transform: scale(1);
     }
 }
 
