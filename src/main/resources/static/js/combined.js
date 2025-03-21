@@ -221,9 +221,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     /**
+     * 서버에서 가챠 설정 가져오기 (실시간)
+     */
+    async function fetchGachaSettings() {
+        try {
+            // API 엔드포인트 호출
+            const response = await fetch('/api/settings/gacha');
+            if (!response.ok) {
+                throw new Error('서버에서 설정을 가져오는데 실패했습니다');
+            }
+            const settings = await response.json();
+
+            // 설정 로깅
+            console.log('서버에서 가챠 설정 로드됨:', settings);
+            return settings;
+        } catch (error) {
+            console.error('가챠 설정 가져오기 실패:', error);
+            // 오류 발생 시 기본값 반환
+            return {
+                luckyChance: 0.01, // 기본 1% 확률
+                defaultHighRankCount: 1,
+                specialHighRankCount: 2,
+                specialMonsters: ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA']
+            };
+        }
+    }
+
+    /**
      * 통합 제비뽑기 시작
      */
-    function startCombinedDrawing() {
+    async function startCombinedDrawing() {
         // 애니메이션 오버레이 표시
         const drawingOverlay = document.getElementById('drawingOverlay');
         if (drawingOverlay) {
@@ -238,6 +265,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const includeMonster = includeMonsterInCombined.checked;
         const includeWeapon = includeWeaponInCombined.checked;
         const includeArmor = includeArmorInCombined.checked;
+
+        // 서버에서 가챠 설정 가져오기
+        const gachaSettings = await fetchGachaSettings();
 
         // 약간의 지연 후 결과 표시 (애니메이션 효과)
         setTimeout(() => {
@@ -289,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             memberResult.armor = result.armorSet;
                             memberResult.isLucky = result.isLucky;
                         } else {
-                            const result = getRandomArmorFallback(includeMonster ? commonResults.monster : null);
+                            const result = getRandomArmorFallback(commonResults.monster, gachaSettings);
                             memberResult.armor = result.armorSet;
                             memberResult.isLucky = result.isLucky;
                         }
@@ -344,6 +374,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // 결과 영역 초기화
         combinedGroupResults.innerHTML = '';
+
+        // 럭키 플레이어가 있는지 확인
+        let hasLuckyPlayer = false;
 
         // 각 그룹별로 카드 생성
         groups.forEach((group, groupIndex) => {
@@ -419,6 +452,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 const memberCard = document.createElement('div');
                 memberCard.className = 'card h-100 border-primary';
 
+                // 럭키 멤버 여부 확인 및 스타일 적용
+                const isLuckyMember = memberResult.results.isLucky;
+                if (isLuckyMember) {
+                    memberCard.classList.add('lucky-member-card');
+                    hasLuckyPlayer = true;
+                }
+
                 // 멤버 카드 헤더
                 const memberHeader = document.createElement('div');
                 memberHeader.className = 'card-header bg-primary bg-gradient text-white d-flex align-items-center';
@@ -466,7 +506,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 // 방어구 결과
                 if (memberResult.results.armor) {
                     const armorDiv = document.createElement('div');
-                    armorDiv.className = 'mb-3';
+                    armorDiv.className = 'mb-3 armor-piece-container';
+
+                    if (isLuckyMember) {
+                        armorDiv.classList.add('lucky-armor');
+                    }
 
                     // 방어구 카드
                     const armorCard = document.createElement('div');
@@ -597,7 +641,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 결과 표시
         combinedDrawResults.style.display = 'block';
     }
-
 
     /**
      * 디스코드에 통합 제비뽑기 결과 공유
@@ -787,15 +830,37 @@ document.addEventListener('DOMContentLoaded', function() {
     /**
      * 대체 함수: 기존 함수가 없을 경우 사용할 방어구 선택 함수
      */
-    function getRandomArmorFallback(monster = null) {
+    function getRandomArmorFallback(monster = null, settings = null) {
         // 결과 객체 초기화
         const armorSet = {};
 
-        // 럭키 효과는 1% 확률로 발동
-        let isLucky = Math.random() <= 0.01;
+        // 설정이 없으면 기본값 사용
+        if (!settings) {
+            settings = {
+                luckyChance: 0.01, // 기본 1% 확률
+                defaultHighRankCount: 1,
+                specialHighRankCount: 2,
+                specialMonsters: ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA']
+            };
+        }
 
-        // 특별 몬스터 목록
-        const specialMonsters = ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA'];
+        // 럭키 효과는 설정된 확률로 발동
+        let isLucky = Math.random() <= settings.luckyChance;
+
+        // 럭키 효과 확인
+        if (isLucky) {
+            console.log("럭키 효과 발동! - getRandomArmorFallback");
+
+            // 럭키 효과 애니메이션 표시
+            if (typeof window.showLuckyEffect === 'function') {
+                setTimeout(() => {
+                    window.showLuckyEffect();
+                }, 100);
+            }
+        }
+
+        // 특별 몬스터 목록 (서버 설정에서 가져옴)
+        const specialMonsters = settings.specialMonsters || ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA'];
 
         // 몬스터가 선택되었는지 확인
         const hasSelectedMonster = monster !== null;
@@ -807,11 +872,11 @@ document.addEventListener('DOMContentLoaded', function() {
         let baseHighRankCount = 0;
         if (hasSelectedMonster) {
             if (isSpecialMonster) {
-                // 특별 몬스터: 2개 확정
-                baseHighRankCount = 2;
+                // 특별 몬스터: 서버 설정값 사용
+                baseHighRankCount = settings.specialHighRankCount || 2;
             } else {
-                // 일반 몬스터: 1개 확정
-                baseHighRankCount = 1;
+                // 일반 몬스터: 서버 설정값 사용
+                baseHighRankCount = settings.defaultHighRankCount || 1;
             }
         }
 
@@ -855,12 +920,343 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // 결과 로그
+        const highCount = Object.values(armorSet).filter(rank => rank.name === 'HIGH_RANK').length;
+        const lowCount = Object.values(armorSet).filter(rank => rank.name === 'LOW_RANK').length;
+        console.log(`방어구 구성: 상위 ${highCount}개, 하위 ${lowCount}개, 럭키: ${isLucky}`);
+        console.log(`럭키 확률: ${settings.luckyChance * 100}%, 몬스터 선택됨: ${hasSelectedMonster}, 특별 몬스터: ${isSpecialMonster}`);
+
         return {
             armorSet: armorSet,
             isLucky: isLucky
         };
     }
 
+    // 개발용: 럭키 모드 테스트 함수
+    window.testCombinedLuckyMode = async function() {
+        console.log('통합 제비뽑기 럭키 모드 테스트');
+
+        // 테스트용 세팅
+        const testSettings = {
+            luckyChance: 1.0, // 100% 확률로 설정
+            defaultHighRankCount: 1,
+            specialHighRankCount: 2,
+            specialMonsters: ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA']
+        };
+
+        // 임의의 몬스터 선택
+        const testMonster = getRandomMonsterFallback();
+
+        // 럭키 방어구 생성 (강제 적용)
+        const result = getRandomArmorFallback(testMonster, testSettings);
+
+        alert('통합 제비뽑기 럭키 테스트가 실행되었습니다. 콘솔을 확인하세요.');
+
+        return result;
+    };
+
     // window 객체에 함수 노출 (다른 스크립트에서 필요할 경우)
     window.combinedShowToast = showToast;
+    window.getRandomArmorFallbackCombined = getRandomArmorFallback;
+});
+
+/**
+ * 럭키 효과 처리를 위한 함수
+ */
+function showLuckyEffect() {
+    console.log("럭키 효과 애니메이션 시작!");
+
+    // 1. 화면에 럭키 효과 오버레이 생성
+    const luckyOverlay = document.createElement('div');
+    luckyOverlay.className = 'lucky-overlay';
+    luckyOverlay.innerHTML = `
+        <div class="lucky-content">
+            <div class="lucky-icon">🎉</div>
+            <div class="lucky-title">LUCKY!</div>
+            <div class="lucky-message">이게 걸리네🤣👍</div>
+        </div>
+    `;
+    document.body.appendChild(luckyOverlay);
+
+    // 2. 오버레이 애니메이션 설정
+    setTimeout(() => {
+        luckyOverlay.classList.add('show');
+
+        // 3. 반짝이는 효과 생성 (30개의 별)
+        for (let i = 0; i < 30; i++) {
+            createStar(luckyOverlay);
+        }
+
+        // 4. 폭죽 효과 추가
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                createFirework(luckyOverlay);
+            }, i * 300);
+        }
+
+        // 5. 일정 시간 후 오버레이 제거
+        setTimeout(() => {
+            luckyOverlay.classList.remove('show');
+            setTimeout(() => {
+                try {
+                    document.body.removeChild(luckyOverlay);
+                } catch (e) {
+                    console.log("오버레이 제거 중 오류 발생", e);
+                }
+            }, 600);
+        }, 3500);
+    }, 100);
+
+    // 6. 방어구 항목에 반짝이는 효과 추가
+    const armorElements = document.querySelectorAll('.armor-piece');
+    armorElements.forEach(element => {
+        element.classList.add('lucky-highlight');
+        setTimeout(() => {
+            element.classList.remove('lucky-highlight');
+        }, 4000);
+    });
+}
+
+// 반짝이는 별 효과 생성 함수
+function createStar(container) {
+    const star = document.createElement('div');
+    star.className = 'lucky-star';
+
+    // 랜덤 위치 설정
+    const left = Math.random() * 100;
+    const top = Math.random() * 100;
+    const size = Math.random() * 20 + 10;
+    const duration = Math.random() * 2 + 1;
+    const delay = Math.random() * 1.5;
+
+    star.style.left = `${left}%`;
+    star.style.top = `${top}%`;
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.animationDuration = `${duration}s`;
+    star.style.animationDelay = `${delay}s`;
+
+    container.appendChild(star);
+
+    // 별 애니메이션 완료 후 제거
+    setTimeout(() => {
+        try {
+            container.removeChild(star);
+        } catch (e) {
+            // 이미 제거된 경우 무시
+        }
+    }, (duration + delay) * 1000);
+}
+
+// 폭죽 효과 생성 함수
+function createFirework(container) {
+    const firework = document.createElement('div');
+    firework.className = 'lucky-firework';
+
+    // 랜덤 위치 설정
+    const left = Math.random() * 80 + 10;
+    const top = Math.random() * 80 + 10;
+
+    firework.style.left = `${left}%`;
+    firework.style.top = `${top}%`;
+
+    container.appendChild(firework);
+
+    // 폭죽 파티클 생성
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'lucky-particle';
+
+        // 랜덤 각도와 거리
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 60 + 40;
+        const duration = Math.random() * 1 + 0.5;
+        const delay = Math.random() * 0.2;
+        const size = Math.random() * 4 + 2;
+
+        // 랜덤 색상
+        const colors = ['#ffff00', '#ff4500', '#00ff00', '#ff00ff', '#00ffff'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        particle.style.backgroundColor = color;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+        particle.style.opacity = '0';
+        particle.style.transition = `all ${duration}s ease-out ${delay}s`;
+
+        firework.appendChild(particle);
+
+        // 파티클 애니메이션 시작
+        setTimeout(() => {
+            particle.style.opacity = '1';
+        }, 10);
+
+        // 파티클 제거
+        setTimeout(() => {
+            try {
+                firework.removeChild(particle);
+            } catch (e) {
+                // 이미 제거된 경우 무시
+            }
+        }, (duration + delay) * 1000);
+    }
+
+    // 폭죽 제거
+    setTimeout(() => {
+        try {
+            container.removeChild(firework);
+        } catch (e) {
+            // 이미 제거된 경우 무시
+        }
+    }, 2000);
+}
+
+// CSS 스타일 추가
+function addLuckyStyles() {
+    // 이미 스타일이 추가되어 있는지 확인
+    if (document.querySelector('style[data-lucky-styles]')) {
+        return;
+    }
+
+    const styleEl = document.createElement('style');
+    styleEl.setAttribute('data-lucky-styles', 'true');
+    styleEl.textContent = `
+        .lucky-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .lucky-overlay.show {
+            opacity: 1;
+        }
+        .lucky-content {
+            text-align: center;
+            color: white;
+            z-index: 2;
+        }
+        .lucky-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: spin 2s infinite;
+        }
+        .lucky-title {
+            font-size: 72px;
+            font-weight: bold;
+            color: gold;
+            text-shadow: 0 0 10px gold, 0 0 20px gold;
+            margin-bottom: 20px;
+            animation: pulse 1s infinite;
+            font-family: 'Arial Black', 'Arial Bold', Gadget, sans-serif;
+        }
+        .lucky-message {
+            font-size: 24px;
+            color: white;
+        }
+        .lucky-star {
+            position: absolute;
+            background-color: gold;
+            border-radius: 50%;
+            opacity: 0;
+            animation: twinkle 2s forwards;
+        }
+        .lucky-highlight {
+            animation: highlight 1s infinite;
+        }
+        .lucky-firework {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            z-index: 1;
+        }
+        .lucky-particle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: gold;
+        }
+        .lucky-member-card {
+            border: 2px solid gold !important;
+            box-shadow: 0 0 15px gold !important;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .lucky-member-card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                rgba(255, 215, 0, 0.3) 0%,
+                rgba(255, 215, 0, 0) 30%,
+                rgba(255, 215, 0, 0) 70%,
+                rgba(255, 215, 0, 0.3) 100%
+            );
+            z-index: 1;
+            animation: lucky-shine 3s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes lucky-shine {
+            0% {
+                transform: translateY(-50%) translateX(-50%) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-50%) translateX(-50%) rotate(360deg);
+            }
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        @keyframes twinkle {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        @keyframes highlight {
+            0% { box-shadow: 0 0 5px gold; }
+            50% { box-shadow: 0 0 20px gold, 0 0 30px gold; }
+            100% { box-shadow: 0 0 5px gold; }
+        }
+        
+        .lucky-armor {
+            position: relative;
+        }
+    `;
+    document.head.appendChild(styleEl);
+}
+
+// DOM 로드 시 스타일 추가
+document.addEventListener('DOMContentLoaded', function() {
+    // 럭키 효과 스타일 추가
+    addLuckyStyles();
+
+    // window 객체에 럭키 효과 함수 등록 (다른 스크립트에서 사용할 수 있도록)
+    window.showLuckyEffect = showLuckyEffect;
+
+    console.log("Lucky 효과 초기화 완료!");
 });
