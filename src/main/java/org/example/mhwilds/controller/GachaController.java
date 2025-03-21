@@ -60,4 +60,15 @@ public class GachaController {
     public Map<String, Object> drawRandomLoadout() {
         return gachaService.drawRandomLoadout();
     }
+
+    /**
+     * 특정 몬스터를 선택했을 때 방어구 세트 뽑기
+     * @param monsterType 선택된 몬스터 타입
+     * @return 몬스터 영향을 받은 방어구 세트
+     */
+    @PostMapping("/gacha/armor/byMonster")
+    @ResponseBody
+    public Map<String, Object> drawArmorByMonster(@RequestBody Monster.MonsterType monsterType) {
+        return gachaService.drawArmorSetByMonster(monsterType);
+    }
 }

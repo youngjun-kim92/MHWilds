@@ -1,0 +1,26 @@
+/* 탭 스타일 커스터마이징 */
+.nav-tabs .nav-link {
+    font-family: 'GongGothicMedium', sans-serif;
+    letter-spacing: -0.5px;
+    color: #495057;
+    border-color: #dee2e6 #dee2e6 #fff;
+    font-weight: 500;
+    padding: 10px 20px;
+    transition: all 0.2s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: #e9ecef #e9ecef #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    background-color: #fff;
+    border-color: #dee2e6 #dee2e6 #fff;
+    border-bottom: 3px solid #0d6efd;
+}
+
+.tab-content {
+    transition: opacity 0.3s ease;
+}

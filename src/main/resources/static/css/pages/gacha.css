@@ -1,0 +1,59 @@
+/* 카드 헤더 및 제목 폰트 스타일 조정 */
+.card-header h3,
+.card-header h4 {
+    font-family: 'GongGothicMedium', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 500;
+    letter-spacing: -0.5px;
+}
+
+/* 카드 헤더 크기 조정 */
+.card-header h4 {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+/* 인포 아이콘 크기 조정 */
+.card-header .fa-circle-info {
+    font-size: 0.9rem;
+}
+
+/* 헤더 높이와 패딩 조정 */
+.card-header.bg-info {
+    padding: 0.8rem 1rem;
+}
+
+/* 결과 섹션 카드 헤더 (몬스터, 무기, 방어구) */
+.card-header.bg-warning h3,
+.card-header.bg-primary h3,
+.card-header.bg-success h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+
+/* 몬스터, 무기 결과 섹션 내부 제목 조정 */
+#monsterResult h4,
+#weaponResult h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+#monsterType,
+#weaponType {
+    font-family: 'GongGothicMedium', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+}
+
+/* 시스템 정보 영역 스타일 조정 */
+.info-box {
+    font-size: 0.9rem;
+}
+
+/* 토스트 메시지 제목 조정 */
+.toast-header strong {
+    font-family: 'GongGothicMedium', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: -0.5px;
+}

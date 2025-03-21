@@ -1,0 +1,23 @@
+<!-- gacha/gacha-main.html -->
+<div th:fragment="gacha-content" class="tab-pane fade" id="gacha-content" role="tabpanel" aria-labelledby="gacha-tab">
+  <!-- 정보 패널 (항상 표시) -->
+  <div th:replace="gacha/info-panel :: info-panel"></div>
+
+  <!-- 설정 카드 -->
+  <div th:replace="gacha/settings :: settings"></div>
+
+  <!-- 컨트롤 버튼 -->
+  <div th:replace="gacha/control-buttons :: control-buttons"></div>
+
+  <!-- 결과 섹션 -->
+  <div class="row g-4">
+    <!-- 몬스터 결과 -->
+    <div th:replace="gacha/monster-section :: monster-section"></div>
+
+    <!-- 무기 결과 -->
+    <div th:replace="gacha/weapon-section :: weapon-section"></div>
+
+    <!-- 방어구 결과 -->
+    <div th:replace="gacha/armor-section :: armor-section"></div>
+  </div>
+</div>

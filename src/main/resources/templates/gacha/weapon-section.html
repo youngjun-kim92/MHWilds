@@ -1,0 +1,26 @@
+<!-- gacha/weapon-section.html -->
+<div th:fragment="weapon-section" class="col-md-4">
+    <div class="card shadow h-100">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0"><i class="fa-solid fa-khanda me-2"></i>무기</h3>
+        </div>
+        <div class="card-body">
+            <!-- 무기 결과 표시 -->
+            <div id="weaponResult" style="display: none;">
+                <div class="text-center mb-4">
+                    <h4 class="text-muted">선택된 무기 종류</h4>
+                    <div class="display-4 fw-bold my-4 text-primary" id="weaponType"></div>
+                </div>
+                <div class="text-center mt-3">
+                    <img id="weaponImage" class="img-fluid rounded" style="max-height: 200px;" alt="무기 이미지">
+                </div>
+            </div>
+
+            <!-- 무기 비어있을 때 -->
+            <div id="weaponEmpty" class="text-center py-5">
+                <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+                <p class="lead text-muted mt-3">무기 가챠를 실행해 주세요</p>
+            </div>
+        </div>
+    </div>
+</div>

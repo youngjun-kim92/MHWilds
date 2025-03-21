@@ -1,0 +1,38 @@
+<!-- gacha/control-buttons.html -->
+<div th:fragment="control-buttons" class="row g-4 mb-4">
+    <div class="col-md-2">
+        <div class="d-grid">
+            <button id="randomMonsterBtn" class="btn btn-lg btn-warning shadow" data-bs-toggle="tooltip" title="몬스터를 먼저 뽑으면 방어구 등급에 영향을 줍니다">
+                <i class="fa-solid fa-dragon me-2"></i>몬스터 가챠
+            </button>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="d-grid">
+            <button id="randomWeaponBtn" class="btn btn-lg btn-primary shadow">
+                <i class="fa-solid fa-khanda me-2"></i>무기 가챠
+            </button>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="d-grid">
+            <button id="randomArmorBtn" class="btn btn-lg btn-success shadow" data-bs-toggle="tooltip" title="1% 확률로 럭키 효과 발동!">
+                <i class="fa-solid fa-shield-halved me-2"></i>방어구 가챠
+            </button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="d-grid">
+            <button id="randomLoadoutBtn" class="btn btn-lg btn-danger shadow" data-bs-toggle="tooltip" title="무기와 방어구를 한번에 뽑습니다. 몬스터도 함께 추첨 가능">
+                <i class="fa-solid fa-star me-2"></i>전체 가챠
+            </button>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="d-grid">
+            <button id="resetBtn" class="btn btn-lg btn-outline-secondary shadow">
+                <i class="fa-solid fa-rotate me-2"></i>초기화
+            </button>
+        </div>
+    </div>
+</div>

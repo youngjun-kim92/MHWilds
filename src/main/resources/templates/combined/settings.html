@@ -1,0 +1,87 @@
+<!-- combined/settings.html -->
+<div th:fragment="settings" class="card mb-3">
+    <div class="card-header bg-light">
+        <h6 class="mb-0">통합 제비뽑기 설정</h6>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label class="form-label">한 그룹당 인원 수</label>
+            <div class="btn-group w-100" role="group" aria-label="그룹당 인원 수">
+                <input type="radio" class="btn-check" name="combinedGroupSize" id="combinedGroupSize1" value="1" checked>
+                <label class="btn btn-outline-primary" for="combinedGroupSize1">1명</label>
+
+                <input type="radio" class="btn-check" name="combinedGroupSize" id="combinedGroupSize2" value="2">
+                <label class="btn btn-outline-primary" for="combinedGroupSize2">2명</label>
+
+                <input type="radio" class="btn-check" name="combinedGroupSize" id="combinedGroupSize3" value="3">
+                <label class="btn btn-outline-primary" for="combinedGroupSize3">3명</label>
+
+                <input type="radio" class="btn-check" name="combinedGroupSize" id="combinedGroupSize4" value="4">
+                <label class="btn btn-outline-primary" for="combinedGroupSize4">4명</label>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="randomizeCombinedGroups" checked>
+                    <label class="form-check-label" for="randomizeCombinedGroups">
+                        참가자 랜덤 섞기
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="shareCombinedToDiscord" checked>
+                    <label class="form-check-label" for="shareCombinedToDiscord">
+                        <i class="fab fa-discord me-2 text-primary"></i>디스코드 공유
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">포함할 항목</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeMonsterInCombined" checked>
+                                    <label class="form-check-label" for="includeMonsterInCombined">
+                                        <i class="fa-solid fa-dragon me-2 text-warning"></i>몬스터
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeWeaponInCombined" checked>
+                                    <label class="form-check-label" for="includeWeaponInCombined">
+                                        <i class="fa-solid fa-khanda me-2 text-primary"></i>무기
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="includeArmorInCombined" checked>
+                                    <label class="form-check-label" for="includeArmorInCombined">
+                                        <i class="fa-solid fa-shield-halved me-2 text-success"></i>방어구
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-grid">
+            <button id="startCombinedDrawBtn" class="btn btn-lg btn-primary shadow">
+                <i class="fa-solid fa-random me-2"></i>통합 제비뽑기 시작
+            </button>
+        </div>
+    </div>
+</div>

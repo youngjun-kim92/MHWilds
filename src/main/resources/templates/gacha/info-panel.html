@@ -1,0 +1,59 @@
+<!-- gacha/info-panel.html -->
+<div th:fragment="info-panel" class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i>시스템 정보</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- 몬스터 영향 설명 -->
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <h5><i class="fa-solid fa-dragon me-2 text-warning"></i>몬스터 영향</h5>
+                            <ul class="fs-6">
+                                <li>부위별로 <strong>90% 하위</strong>, <strong>10% 상위</strong> 확률</li>
+                                <li class="special-monster">특별 몬스터 : <strong>상위 방어구 2개 확정</strong>
+                                    <ul class="special-monsters-list">
+                                        <li>진 다하드</li>
+                                        <li>알슈베르도</li>
+                                        <li>고어 마가라</li>
+                                        <li>레 다우</li>
+                                        <li>우드투나</li>
+                                    </ul>
+                                </li>
+                                <li>일반 몬스터 : <strong>상위 방어구 1개 확정</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 럭키 효과 설명 -->
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <h5><i class="fa-solid fa-star me-2 text-warning"></i>럭키 효과</h5>
+                            <ul class="fs-6">
+                                <li>방어구 가챠 시 <strong>1% 확률</strong>로 럭키 효과 발동</li>
+                                <li>럭키 효과 발동 시 <strong>원하는 방어구를 입을 수 있음</strong></li>
+                                <li>방어구 뱃지에 <strong>✨</strong> 표시가 나타남</li>
+                                <li>디스코드에 공유 시 <strong>LUCKY!</strong> 문구 표시</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 기타 정보 -->
+                    <div class="col-md-4">
+                        <div class="info-box">
+                            <h5><i class="fa-solid fa-shield-halved me-2 text-success"></i>기타 정보</h5>
+                            <ul class="fs-6">
+                                <li>모든 방어구는 <strong>호프셋</strong>으로 고정</li>
+                                <li>몬스터 가챠 후 방어구/전체 가챠 실행 시 몬스터 효과 적용</li>
+                                <li><strong>전체 가챠 몬스터 포함</strong> 활성화 시 몬스터도 함께 추첨</li>
+                                <li>리셋 버튼으로 모든 결과 초기화 가능</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

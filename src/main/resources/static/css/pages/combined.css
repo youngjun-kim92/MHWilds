@@ -1,0 +1,78 @@
+/* 통합 제비뽑기 결과 스타일 추가 */
+
+/* 카드 헤더 그라데이션 효과 */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+/* 카드 호버 효과 */
+.card:hover {
+    transform: none;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* 그룹 카드 */
+#combinedGroupResults .card {
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+/* 몬스터 카드 효과 */
+.card.bg-warning.bg-opacity-10 {
+    border-color: #ffc107;
+}
+
+.card.bg-warning.bg-opacity-10 h4.text-warning {
+    font-weight: 600;
+}
+
+.card.bg-warning.bg-opacity-10 img {
+    transition: all 0.3s ease;
+}
+
+.card.bg-warning.bg-opacity-10:hover img {
+    transform: scale(1.05);
+}
+
+/* 무기 카드 효과 */
+.card.bg-primary.bg-opacity-10 {
+    border-color: #0d6efd;
+}
+
+.card.bg-primary.bg-opacity-10 .display-6 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card.bg-primary.bg-opacity-10 img {
+    transition: all 0.3s ease;
+}
+
+.card.bg-primary.bg-opacity-10:hover img {
+    transform: scale(1.05);
+}
+
+/* 방어구 카드 효과 */
+.card.bg-success.bg-opacity-10 {
+    border-color: #20c997;
+}
+
+/* 럭키 효과 애니메이션 */
+.text-warning.mt-2 {
+    animation: glowText 1.5s infinite alternate;
+}
+
+@keyframes glowText {
+    from {
+        text-shadow: 0 0 5px #ffc107;
+    }
+    to {
+        text-shadow: 0 0 15px #ffc107, 0 0 20px #ff5e00;
+    }
+}
+
+/* 결과 컨테이너에 페이드인 애니메이션 추가 */
+#combinedDrawResults {
+    animation: fadeIn 0.8s ease;
+}

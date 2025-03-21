@@ -111,4 +111,74 @@ public class GachaService {
             armorRanks.put(type, ranks);
         }
     }
+
+    /**
+     * 특정 몬스터의 특별 여부 확인
+     * @param monsterType 확인할 몬스터 타입
+     * @return 특별 몬스터 여부
+     */
+    private boolean isSpecialMonster(Monster.MonsterType monsterType) {
+        // 특별 몬스터 목록
+        List<Monster.MonsterType> specialMonsters = Arrays.asList(
+                Monster.MonsterType.TRUE_DAHARD,
+                Monster.MonsterType.ALSUVERDE,
+                Monster.MonsterType.GORE_MAGALA,
+                Monster.MonsterType.RADAU,
+                Monster.MonsterType.WOODTUNA
+        );
+
+        return specialMonsters.contains(monsterType);
+    }
+
+    /**
+     * 선택한 몬스터 기반으로 방어구 세트 뽑기
+     * @param monsterType 선택된 몬스터 타입
+     * @return 몬스터의 영향을 받은 방어구 세트와 럭키 여부
+     */
+    public Map<String, Object> drawArmorSetByMonster(Monster.MonsterType monsterType) {
+        Map<String, Object> result = new HashMap<>();
+        Map<Armor.ArmorType, Armor.ArmorRank> armorSet = new EnumMap<>(Armor.ArmorType.class);
+
+        // 럭키 확률 체크 (1%)
+        boolean isLucky = random.nextDouble() <= 0.01;
+
+        if (isLucky) {
+            // 럭키 효과 - 모든 방어구 상위 등급
+            for (Armor.ArmorType type : Armor.ArmorType.values()) {
+                armorSet.put(type, Armor.ArmorRank.HIGH_RANK);
+            }
+        } else {
+            // 특별 몬스터 여부 확인
+            boolean isSpecialMonster = isSpecialMonster(monsterType);
+
+            // 확정 상위 방어구 개수 결정
+            int guaranteedHighRank = isSpecialMonster ? 2 : 1;
+
+            // 기본적으로 모든 부위 하위 등급으로 설정
+            for (Armor.ArmorType type : Armor.ArmorType.values()) {
+                armorSet.put(type, Armor.ArmorRank.LOW_RANK);
+            }
+
+            // 상위 등급 적용 (랜덤하게 부위 선택)
+            List<Armor.ArmorType> types = new ArrayList<>(Arrays.asList(Armor.ArmorType.values()));
+            Collections.shuffle(types);
+
+            // 확정 상위 방어구 적용
+            for (int i = 0; i < guaranteedHighRank && i < types.size(); i++) {
+                armorSet.put(types.get(i), Armor.ArmorRank.HIGH_RANK);
+            }
+
+            // 추가 상위 방어구 체크 (남은 부위에 대해 각각 10% 확률)
+            for (int i = guaranteedHighRank; i < types.size(); i++) {
+                if (random.nextDouble() <= 0.1) {
+                    armorSet.put(types.get(i), Armor.ArmorRank.HIGH_RANK);
+                }
+            }
+        }
+
+        result.put("armorSet", armorSet);
+        result.put("isLucky", isLucky);
+
+        return result;
+    }
 }

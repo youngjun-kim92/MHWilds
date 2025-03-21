@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,6 +176,46 @@ public class DiscordController {
 
         } catch (Exception e) {
             logger.error("Error in share-lottery-to-discord API", e);
+            response.put("success", false);
+            response.put("message", "서버 오류: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 통합 제비뽑기 결과를 디스코드에 공유하는 API (진행자 정보 제외)
+     */
+    @PostMapping("/share-combined-to-discord")
+    public ResponseEntity<Map<String, Object>> shareCombinedToDiscord(@RequestBody Map<String, Object> payload) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 그룹 데이터 추출
+            List<Map<String, Object>> groups = (List<Map<String, Object>>) payload.get("groups");
+
+            logger.info("Received share-combined-to-discord request with {} groups", groups.size());
+
+            // 그룹 유효성 검사
+            if (groups == null || groups.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "통합 제비뽑기 결과가 비어있습니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 디스코드에 결과 전송 (nickname을 null로 설정하여 진행자 정보 생략)
+            boolean success = discordService.sendCombinedResultToDiscord(null, groups);
+
+            response.put("success", success);
+            if (success) {
+                response.put("message", "통합 제비뽑기 결과가 디스코드 채널에 성공적으로 공유되었습니다");
+            } else {
+                response.put("message", "디스코드 전송 중 오류가 발생했습니다");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error in share-combined-to-discord API", e);
             response.put("success", false);
             response.put("message", "서버 오류: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);

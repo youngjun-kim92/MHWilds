@@ -1,0 +1,162 @@
+/* 방어구 관련 스타일 */
+.armor-piece {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    height: 100%;
+    transition: all 0.2s ease;
+}
+
+.armor-piece:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+.armor-title {
+    border-bottom: 1px dashed #ddd;
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.armor-piece h6 {
+    font-weight: 700;
+    color: #0d6efd;
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+}
+
+/* 방어구 부위 컨테이너 스타일 */
+.armor-parts-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* 방어구 부위 스타일 */
+.armor-part {
+    display: flex;
+    align-items: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: all 0.2s ease;
+    border-left: 5px solid #20c997;
+}
+
+.armor-part:hover {
+    transform: translateX(5px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 방어구 아이콘 스타일 */
+.armor-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #e9ecef;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: #6c757d;
+}
+
+/* 방어구 정보 스타일 */
+.armor-info {
+    flex: 1;
+}
+
+/* 방어구 이름 스타일 */
+.armor-name {
+    font-weight: bold;
+    color: #495057;
+}
+
+/* 방어구 등급 컨테이너 스타일 */
+.armor-rank-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+/* 방어구 등급 스타일 */
+.armor-rank {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+    background-color: #6c757d;
+}
+
+/* 상위 등급 스타일 */
+.armor-rank.high-rank {
+    background-color: #0dcaf0;
+}
+
+/* 럭키 등급 스타일 */
+.armor-rank.lucky {
+    background-color: #ff9500;
+    color: white;
+    font-weight: bold;
+    text-shadow: 0 0 2px #000;
+    animation: glow 1.5s infinite alternate;
+}
+
+/* 호프셋 배지 스타일 */
+.hopset-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: white;
+    background-color: #20c997;
+}
+
+/* 내성 스타일 */
+.resistance {
+    font-weight: bold;
+}
+
+.resistance.fire {
+    color: #dc3545;
+}
+
+.resistance.water {
+    color: #0d6efd;
+}
+
+.resistance.thunder {
+    color: #ffc107;
+}
+
+.resistance.ice {
+    color: #0dcaf0;
+}
+
+.resistance.dragon {
+    color: #6f42c1;
+}
+
+@media (max-width: 767.98px) {
+    .armor-part {
+        padding: 10px 12px;
+    }
+
+    .armor-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+        margin-right: 10px;
+    }
+
+    .armor-rank, .hopset-badge {
+        font-size: 0.75rem;
+        padding: 3px 8px;
+    }
+}

@@ -1,0 +1,47 @@
+/* 토글 스위치 그룹 스타일 */
+.toggle-switch-group {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-left: 5px solid #fd7e14;
+    transition: all 0.3s ease;
+}
+
+.toggle-active {
+    background-color: #fff3e0;
+    box-shadow: 0 3px 10px rgba(253, 126, 20, 0.2);
+}
+
+.toggle-switch-title {
+    font-family: 'GongGothicMedium', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: -0.2px;
+    margin-bottom: 8px;
+    color: #495057;
+}
+
+/* 몬스터 선택 드롭박스 스타일 */
+#monsterSelectGroup {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px;
+    transition: all 0.3s ease;
+}
+
+#monsterSelectGroup.toggle-active {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+/* 인원 선택 버튼 그룹 스타일 */
+.btn-group .btn-outline-primary {
+    border-width: 2px;
+    font-weight: bold;
+}
+
+.btn-group .btn-check:checked + .btn-outline-primary {
+    background-color: #0d6efd;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+}

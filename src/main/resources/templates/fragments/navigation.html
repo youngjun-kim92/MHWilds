@@ -1,0 +1,21 @@
+<!-- fragments/navigation.html -->
+<ul th:fragment="tabs" class="nav nav-tabs" id="mainTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="combined-tab" data-bs-toggle="tab" data-bs-target="#combined-content"
+                type="button" role="tab" aria-controls="combined-content" aria-selected="true">
+            <i class="fa-solid fa-users-gear me-2"></i>통합 제비뽑기
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="gacha-tab" data-bs-toggle="tab" data-bs-target="#gacha-content"
+                type="button" role="tab" aria-controls="gacha-content" aria-selected="false">
+            <i class="fa-solid fa-dice me-2"></i>가챠 시스템
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="lottery-tab" data-bs-toggle="tab" data-bs-target="#lottery-content"
+                type="button" role="tab" aria-controls="lottery-content" aria-selected="false">
+            <i class="fa-solid fa-users me-2"></i>제비뽑기
+        </button>
+    </li>
+</ul>

@@ -1,0 +1,29 @@
+<!-- lottery/lottery-main.html -->
+<div th:fragment="lottery-content" class="tab-pane fade" id="lottery-content" role="tabpanel" aria-labelledby="lottery-tab">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0"><i class="fa-solid fa-users me-2"></i>참가자 제비뽑기</h3>
+                    <div class="d-flex">
+                        <span class="badge bg-light text-dark me-2" id="participantCountBadge">참가자 0명</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- 참가자 입력 폼 -->
+                    <div th:replace="lottery/form :: form"></div>
+
+                    <!-- 제비뽑기 설정 -->
+                    <div class="row mb-4">
+                        <div class="col-md-8 mx-auto">
+                            <div th:replace="lottery/settings :: settings"></div>
+                        </div>
+                    </div>
+
+                    <!-- 제비뽑기 결과 -->
+                    <div th:replace="lottery/results :: results"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

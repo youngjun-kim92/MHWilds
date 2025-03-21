@@ -1,0 +1,29 @@
+<!-- gacha/monster-section.html -->
+<div th:fragment="monster-section" class="col-md-4">
+  <div class="card shadow h-100">
+    <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+      <h3 class="mb-0"><i class="fa-solid fa-dragon me-2"></i>몬스터</h3>
+      <div class="monster-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>몬스터 선택 시:<br>• 특별 몬스터: 상위 방어구 2개 확정<br>• 일반 몬스터: 상위 방어구 1개 확정</div>">
+        <i class="fa-solid fa-circle-info text-white"></i>
+      </div>
+    </div>
+    <div class="card-body">
+      <!-- 몬스터 결과 표시 -->
+      <div id="monsterResult" style="display: none;">
+        <div class="text-center mb-4">
+          <h4 class="text-muted">선택된 몬스터</h4>
+          <div class="display-4 fw-bold my-4 text-warning" id="monsterType"></div>
+        </div>
+        <div class="text-center mt-3">
+          <img id="monsterImage" class="img-fluid rounded" style="max-height: 200px;" alt="몬스터 이미지">
+        </div>
+      </div>
+
+      <!-- 몬스터 비어있을 때 -->
+      <div id="monsterEmpty" class="text-center py-5">
+        <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+        <p class="lead text-muted mt-3">몬스터 가챠를 실행해 주세요</p>
+      </div>
+    </div>
+  </div>
+</div>

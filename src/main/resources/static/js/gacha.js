@@ -426,6 +426,12 @@ document.addEventListener('DOMContentLoaded', function() {
         armorResult.style.display = 'block';
         armorEmpty.style.display = 'none';
 
+        // 호프셋 배지 모두 표시
+        const hopsetBadges = document.querySelectorAll('.hopset-badge');
+        hopsetBadges.forEach(badge => {
+            badge.style.display = 'inline-flex';
+        });
+
         // 모든 방어구 등급 초기화
         const rankElements = ['headRank', 'chestRank', 'armRank', 'waistRank', 'legRank'];
         rankElements.forEach(id => {
@@ -581,5 +587,73 @@ document.addEventListener('DOMContentLoaded', function() {
         const toast = new bootstrap.Toast(document.getElementById('discordToast'));
         document.getElementById('discordToastMessage').innerHTML = '🎉 <strong>LUCKY!</strong> 🎉 럭키 모드 테스트 중입니다!';
         toast.show();
+    };
+
+    // 몬스터 드롭박스 요소 참조 추가
+    const monsterSelectDropdown = document.getElementById('monsterSelectDropdown');
+    const applyMonsterBtn = document.getElementById('applyMonsterBtn');
+
+    // 몬스터 데이터로 드롭박스 채우기 함수 (DOMContentLoaded 이벤트 내에 배치)
+    function populateMonsterDropdown() {
+        // 기존 옵션 제거 (첫 번째 기본 옵션은 유지)
+        while (monsterSelectDropdown.options.length > 1) {
+            monsterSelectDropdown.remove(1);
+        }
+
+        // 몬스터 데이터로 드롭박스 채우기
+        monsterTypes.forEach(monster => {
+            const option = document.createElement('option');
+            option.value = monster.name;
+            option.textContent = monster.korName;
+            monsterSelectDropdown.appendChild(option);
+        });
+    }
+
+    // 드롭박스 초기화 (DOMContentLoaded 이벤트 내부 초기화 부분에 추가)
+    populateMonsterDropdown();
+
+    // 몬스터 선택 적용 버튼 클릭 이벤트 (다른 이벤트 리스너들과 함께 추가)
+    applyMonsterBtn.addEventListener('click', function() {
+        const selectedMonsterValue = monsterSelectDropdown.value;
+
+        if (!selectedMonsterValue) {
+            // 몬스터가 선택되지 않았을 경우
+            alert('몬스터를 선택해주세요.');
+            return;
+        }
+
+        // 선택된 몬스터 찾기
+        const selectedMonster = monsterTypes.find(monster => monster.name === selectedMonsterValue);
+
+        if (selectedMonster) {
+            // 현재 몬스터 변수 업데이트
+            currentMonster = selectedMonster;
+
+            // 몬스터 화면에 표시
+            displayMonster(selectedMonster);
+
+            // 알림 표시
+            const toast = new bootstrap.Toast(document.getElementById('discordToast'));
+            document.getElementById('discordToastMessage').innerHTML =
+                `<strong>${selectedMonster.korName}</strong> 몬스터가 적용되었습니다!`;
+            toast.show();
+
+            console.log("선택된 몬스터:", currentMonster);
+
+            // 디스코드 공유 체크 확인
+            if(shareToDiscordCheckbox.checked && nicknameInput.value.trim() !== '') {
+                shareResultToDiscord('monster');
+            }
+        }
+    });
+
+    // 초기화 버튼에 몬스터 드롭박스 초기화 추가 (resetAll 함수 수정)
+    const originalResetAll = resetAll;
+    resetAll = function() {
+        // 기존 초기화 함수 호출
+        originalResetAll();
+
+        // 몬스터 드롭박스 초기화
+        monsterSelectDropdown.selectedIndex = 0;
     };
 });

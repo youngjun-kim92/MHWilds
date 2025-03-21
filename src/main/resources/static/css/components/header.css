@@ -1,0 +1,33 @@
+/* 헤더 타이틀과 부제목에 GongGothicMedium 폰트 적용 */
+.header-custom h1,
+.header-custom p,
+.card-header h3,
+.card-header h4 {
+    font-family: 'GongGothicMedium', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+/* 헤더 커스텀 스타일 */
+.header-custom {
+    background: linear-gradient(135deg, #333 0%, #111 100%);
+    border-bottom: 5px solid #f8b400;
+    overflow: hidden;
+    position: relative;
+}
+
+.header-custom::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('/img/header-pattern.webp') repeat;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.header-custom h1, .header-custom p {
+    position: relative;
+    z-index: 1;
+}

@@ -121,6 +121,44 @@ public class DiscordService {
     }
 
     /**
+     * 디스코드 웹훅을 통해 통합 제비뽑기 결과를 전송
+     * @param nickname 사용자 닉네임
+     * @return 성공 여부
+     */
+    public boolean sendCombinedResultToDiscord(String nickname, List<Map<String, Object>> groups) {
+        try {
+            // 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 메시지 내용 생성
+            String content = buildCombinedDiscordMessage(nickname, groups);
+
+            // 메시지 객체 생성
+            Map<String, Object> discordMessage = new HashMap<>();
+            discordMessage.put("content", content);
+
+            // HTTP 요청 생성
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(discordMessage, headers);
+
+            // 디스코드 웹훅으로 전송
+            ResponseEntity<String> response = restTemplate.postForEntity(discordWebhookUrl, request, String.class);
+
+            // 응답 확인
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Discord combined message sent successfully");
+                return true;
+            } else {
+                logger.error("Failed to send Discord combined message. Status code: {}", response.getStatusCodeValue());
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Error sending combined message to Discord", e);
+            return false;
+        }
+    }
+
+    /**
      * 디스코드에 보낼 메시지 본문 생성 (몬스터 및 럭키 효과 포함)
      */
     private String buildDiscordMessage(String nickname, String gachaType,
@@ -206,9 +244,8 @@ public class DiscordService {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-        // 헤더 추가
+        // 헤더 추가 (진행자 정보 제외)
         message.append("**:tada: 제비뽑기 결과 :tada:**\n");
-        message.append("> **진행자**: ").append(nickname).append("\n");
         message.append("> **시간**: ").append(now.format(formatter)).append("\n");
         message.append("> **그룹 인원**: ").append(groupSize).append("명\n");
         message.append("> **랜덤 섞기**: ").append(randomized ? "적용" : "미적용").append("\n");
@@ -222,6 +259,109 @@ public class DiscordService {
 
             for (int j = 0; j < group.size(); j++) {
                 message.append("> ").append(j + 1).append(". ").append(group.get(j)).append("\n");
+            }
+
+            // 그룹 간 구분선 추가 (마지막 그룹 제외)
+            if (i < groups.size() - 1) {
+                message.append("\n");
+            }
+        }
+
+        return message.toString();
+    }
+
+    /**
+     * 디스코드에 보낼 통합 제비뽑기 결과 메시지 본문 생성
+     */
+    private String buildCombinedDiscordMessage(String nickname, List<Map<String, Object>> groups) {
+        StringBuilder message = new StringBuilder();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 헤더 추가
+        message.append("**:video_game: 통합 제비뽑기 결과 :video_game:**\n");
+        message.append("> **시간**: ").append(now.format(formatter)).append("\n");
+
+        // 그룹 및 참가자 수 계산
+        int totalGroups = groups.size();
+        int totalParticipants = 0;
+        for (Map<String, Object> group : groups) {
+            List<Map<String, Object>> memberResults = (List<Map<String, Object>>) group.get("memberResults");
+            if (memberResults != null) {
+                totalParticipants += memberResults.size();
+            }
+        }
+
+        message.append("> **총 인원**: ").append(totalParticipants).append("명\n");
+        message.append("> **총 그룹수**: ").append(totalGroups).append("개\n\n");
+
+        // 각 그룹 정보 추가
+        for (int i = 0; i < groups.size(); i++) {
+            Map<String, Object> group = groups.get(i);
+            message.append("**:bookmark_tabs: 그룹 ").append(i + 1).append("**\n");
+
+            // 공통 몬스터 정보 (그룹 전체)
+            Map<String, Object> commonResults = (Map<String, Object>) group.get("commonResults");
+            if (commonResults != null && commonResults.containsKey("monster")) {
+                Map<String, String> monsterData = (Map<String, String>) commonResults.get("monster");
+                if (monsterData != null) {
+                    message.append("**:dragon: 그룹 몬스터**: ");
+                    message.append(monsterData.get("korName")).append("\n\n");
+                }
+            }
+
+            // 개인별 결과
+            List<Map<String, Object>> memberResults = (List<Map<String, Object>>) group.get("memberResults");
+            if (memberResults != null) {
+                for (int j = 0; j < memberResults.size(); j++) {
+                    Map<String, Object> memberResult = memberResults.get(j);
+                    String memberName = (String) memberResult.get("name");
+                    Map<String, Object> results = (Map<String, Object>) memberResult.get("results");
+
+                    message.append("**:bust_in_silhouette: ").append(j + 1).append(". ").append(memberName).append("**\n");
+
+                    // 무기 정보
+                    if (results.containsKey("weapon")) {
+                        Map<String, String> weaponData = (Map<String, String>) results.get("weapon");
+                        if (weaponData != null) {
+                            message.append("> **무기**: ").append(weaponData.get("korName")).append("\n");
+                        }
+                    }
+
+                    // 방어구 정보
+                    if (results.containsKey("armor")) {
+                        boolean isLucky = results.containsKey("isLucky") && (boolean) results.get("isLucky");
+                        Map<String, Object> armorData = (Map<String, Object>) results.get("armor");
+
+                        message.append("> **방어구 (호프셋)**");
+                        if (isLucky) {
+                            message.append(": ✨ 럭키! 원하는 방어구 착용 가능 ✨\n");
+                        } else {
+                            message.append(":\n");
+
+                            for (Map.Entry<String, Object> entry : armorData.entrySet()) {
+                                String armorType = entry.getKey();
+                                Map<String, String> rankData = (Map<String, String>) entry.getValue();
+
+                                // 방어구 타입 한글화
+                                String armorTypeName;
+                                switch (armorType) {
+                                    case "HEAD": armorTypeName = "투구"; break;
+                                    case "CHEST": armorTypeName = "갑옷"; break;
+                                    case "ARM": armorTypeName = "팔보호구"; break;
+                                    case "WAIST": armorTypeName = "허리보호구"; break;
+                                    case "LEG": armorTypeName = "다리보호구"; break;
+                                    default: armorTypeName = armorType;
+                                }
+
+                                message.append(">   • ").append(armorTypeName).append(": ")
+                                        .append(rankData.get("korName")).append(" 등급\n");
+                            }
+                        }
+                    }
+
+                    message.append("\n");
+                }
             }
 
             // 그룹 간 구분선 추가 (마지막 그룹 제외)

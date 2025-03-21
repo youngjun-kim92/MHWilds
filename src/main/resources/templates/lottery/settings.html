@@ -1,0 +1,47 @@
+<!-- lottery/settings.html -->
+<div th:fragment="settings" class="card mb-3">
+  <div class="card-header bg-light">
+    <h6 class="mb-0">제비뽑기 설정</h6>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <label class="form-label">한 그룹당 인원 수</label>
+      <div class="btn-group w-100" role="group" aria-label="그룹당 인원 수">
+        <input type="radio" class="btn-check" name="groupSize" id="groupSize1" value="1" checked>
+        <label class="btn btn-outline-primary" for="groupSize1">1명</label>
+
+        <input type="radio" class="btn-check" name="groupSize" id="groupSize2" value="2">
+        <label class="btn btn-outline-primary" for="groupSize2">2명</label>
+
+        <input type="radio" class="btn-check" name="groupSize" id="groupSize3" value="3">
+        <label class="btn btn-outline-primary" for="groupSize3">3명</label>
+
+        <input type="radio" class="btn-check" name="groupSize" id="groupSize4" value="4">
+        <label class="btn btn-outline-primary" for="groupSize4">4명</label>
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="randomizeGroups" checked>
+      <label class="form-check-label" for="randomizeGroups">
+        참가자 순서 랜덤 섞기
+      </label>
+    </div>
+
+    <div class="form-check mb-3">
+      <input class="form-check-input" type="checkbox" id="shareLotteryToDiscord" checked>
+      <label class="form-check-label" for="shareLotteryToDiscord">
+        <i class="fab fa-discord me-2 text-primary"></i>결과를 디스코드에 자동으로 공유합니다
+      </label>
+      <div class="form-text mt-1">
+        <small>상단 설정에 입력된 닉네임으로 공유됩니다</small>
+      </div>
+    </div>
+
+    <div class="d-grid">
+      <button id="startDrawBtn" class="btn btn-lg btn-primary shadow">
+        <i class="fa-solid fa-random me-2"></i>제비뽑기 시작
+      </button>
+    </div>
+  </div>
+</div>
