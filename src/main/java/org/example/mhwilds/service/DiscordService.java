@@ -16,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -74,6 +75,47 @@ public class DiscordService {
             }
         } catch (Exception e) {
             logger.error("Error sending message to Discord", e);
+            return false;
+        }
+    }
+
+    /**
+     * 디스코드 웹훅을 통해 제비뽑기 결과를 전송
+     * @param nickname 사용자 닉네임
+     * @param groups 그룹별 참가자 목록
+     * @param groupSize 각 그룹별 인원 수
+     * @param randomized 랜덤 섞기 적용 여부
+     * @return 성공 여부
+     */
+    public boolean sendLotteryResultToDiscord(String nickname, List<List<String>> groups, int groupSize, boolean randomized) {
+        try {
+            // 헤더 설정
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            // 메시지 내용 생성
+            String content = buildLotteryDiscordMessage(nickname, groups, groupSize, randomized);
+
+            // 메시지 객체 생성
+            Map<String, Object> discordMessage = new HashMap<>();
+            discordMessage.put("content", content);
+
+            // HTTP 요청 생성
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(discordMessage, headers);
+
+            // 디스코드 웹훅으로 전송
+            ResponseEntity<String> response = restTemplate.postForEntity(discordWebhookUrl, request, String.class);
+
+            // 응답 확인
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("Discord lottery message sent successfully for user: {}", nickname);
+                return true;
+            } else {
+                logger.error("Failed to send Discord lottery message. Status code: {}", response.getStatusCodeValue());
+                return false;
+            }
+        } catch (Exception e) {
+            logger.error("Error sending lottery message to Discord", e);
             return false;
         }
     }
@@ -154,6 +196,52 @@ public class DiscordService {
         }
 
         return message.toString();
+    }
+
+    /**
+     * 디스코드에 보낼 제비뽑기 결과 메시지 본문 생성
+     */
+    private String buildLotteryDiscordMessage(String nickname, List<List<String>> groups, int groupSize, boolean randomized) {
+        StringBuilder message = new StringBuilder();
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        // 헤더 추가
+        message.append("**:tada: 제비뽑기 결과 :tada:**\n");
+        message.append("> **진행자**: ").append(nickname).append("\n");
+        message.append("> **시간**: ").append(now.format(formatter)).append("\n");
+        message.append("> **그룹 인원**: ").append(groupSize).append("명\n");
+        message.append("> **랜덤 섞기**: ").append(randomized ? "적용" : "미적용").append("\n");
+        message.append("> **총 인원**: ").append(countTotalParticipants(groups)).append("명\n");
+        message.append("> **총 그룹수**: ").append(groups.size()).append("개\n\n");
+
+        // 각 그룹 정보 추가
+        for (int i = 0; i < groups.size(); i++) {
+            List<String> group = groups.get(i);
+            message.append("**:pushpin: 그룹 ").append(i + 1).append("**\n");
+
+            for (int j = 0; j < group.size(); j++) {
+                message.append("> ").append(j + 1).append(". ").append(group.get(j)).append("\n");
+            }
+
+            // 그룹 간 구분선 추가 (마지막 그룹 제외)
+            if (i < groups.size() - 1) {
+                message.append("\n");
+            }
+        }
+
+        return message.toString();
+    }
+
+    /**
+     * 전체 참가자 수 계산
+     */
+    private int countTotalParticipants(List<List<String>> groups) {
+        int total = 0;
+        for (List<String> group : groups) {
+            total += group.size();
+        }
+        return total;
     }
 
     // 오버로딩된 메소드들 (기존 메소드와의 호환성 유지)

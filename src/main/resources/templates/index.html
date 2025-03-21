@@ -7,138 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        .info-box {
-            background-color: #f8f9fa;
-            border-radius: 0.5rem;
-            padding: 1rem;
-            height: 100%;
-            border-left: 4px solid #0dcaf0;
-        }
-
-        .special-monster {
-            font-weight: bold;
-            color: #fd7e14;
-        }
-
-        .special-monsters-list {
-            font-weight: normal;
-            color: inherit;
-            font-size: 0.85rem;
-        }
-
-        .monster-info-trigger, .armor-info-trigger {
-            cursor: help;
-        }
-
-        /* 툴팁 스타일 */
-        .tooltip-inner {
-            max-width: 300px;
-            text-align: center;
-            padding: 10px;
-        }
-
-        /* 방어구 부분 스타일 */
-        .armor-parts-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .armor-part {
-            display: flex;
-            align-items: center;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 12px 15px;
-            transition: all 0.2s ease;
-            border-left: 5px solid #20c997;
-        }
-
-        .armor-part:hover {
-            transform: translateX(5px);
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .armor-icon {
-            width: 40px;
-            height: 40px;
-            background-color: #e9ecef;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-right: 15px;
-            font-size: 1.2rem;
-            color: #6c757d;
-        }
-
-        .armor-info {
-            flex: 1;
-        }
-
-        .armor-name {
-            font-weight: bold;
-            color: #495057;
-        }
-
-        .armor-rank {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            color: white;
-            background-color: #6c757d;
-            margin-top: 4px;
-        }
-
-        .armor-rank.high-rank {
-            background-color: #0dcaf0;
-        }
-
-        .armor-rank.lucky {
-            background-color: #ff9500;  /* 더 진한 주황색 */
-            color: white;               /* 흰색 텍스트로 변경 */
-            font-weight: bold;          /* 굵게 표시 */
-            text-shadow: 0 0 2px #000;  /* 텍스트에 그림자 추가 */
-            animation: glow 1.5s infinite alternate;
-        }
-
-        @keyframes glow {
-            from {
-                box-shadow: 0 0 5px #ff9500;
-            }
-            to {
-                box-shadow: 0 0 15px #ff9500, 0 0 20px #ff5e00;
-            }
-        }
-
-        /* 헤더 커스텀 스타일 수정 */
-        .header-custom {
-            background: linear-gradient(135deg, rgba(51, 51, 51, 0.85) 0%, rgba(17, 17, 17, 0.85) 100%);
-            border-bottom: 5px solid #f8b400;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .header-custom::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('/img/header-pattern.webp') center center;
-            background-size: cover;
-            opacity: 0.3;
-            z-index: 0;
-        }
-
-        .header-custom h1, .header-custom p {
-            position: relative;
-            z-index: 1;
-        }
-    </style>
 </head>
 <body class="bg-light">
 <div class="container py-4">
@@ -150,271 +18,433 @@
         </div>
     </header>
 
-    <!-- 정보 패널 (항상 표시) -->
+    <!-- 탭 네비게이션 -->
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="card shadow">
-                <div class="card-header bg-info text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i>시스템 정보</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <!-- 몬스터 영향 설명 -->
-                        <div class="col-md-4">
-                            <div class="info-box">
-                                <h5><i class="fa-solid fa-dragon me-2 text-warning"></i>몬스터 영향</h5>
-                                <ul class="fs-6">
-                                    <li>부위별로 <strong>90% 하위</strong>, <strong>10% 상위</strong> 확률</li>
-                                    <li class="special-monster">특별 몬스터 : <strong>상위 방어구 2개 확정</strong>
-                                        <ul class="special-monsters-list">
-                                            <li>진 다하드</li>
-                                            <li>알슈베르도</li>
-                                            <li>고어 마가라</li>
-                                            <li>레 다우</li>
-                                            <li>우드투나</li>
+            <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="gacha-tab" data-bs-toggle="tab" data-bs-target="#gacha-content"
+                            type="button" role="tab" aria-controls="gacha-content" aria-selected="true">
+                        <i class="fa-solid fa-dice me-2"></i>가챠 시스템
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="lottery-tab" data-bs-toggle="tab" data-bs-target="#lottery-content"
+                            type="button" role="tab" aria-controls="lottery-content" aria-selected="false">
+                        <i class="fa-solid fa-users me-2"></i>제비뽑기
+                    </button>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 탭 컨텐츠 -->
+    <div class="tab-content" id="mainTabContent">
+        <!-- 가챠 시스템 탭 -->
+        <div class="tab-pane fade show active" id="gacha-content" role="tabpanel" aria-labelledby="gacha-tab">
+            <!-- 정보 패널 (항상 표시) -->
+            <div class="row mb-4">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0"><i class="fa-solid fa-circle-info me-2"></i>시스템 정보</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- 몬스터 영향 설명 -->
+                                <div class="col-md-4">
+                                    <div class="info-box">
+                                        <h5><i class="fa-solid fa-dragon me-2 text-warning"></i>몬스터 영향</h5>
+                                        <ul class="fs-6">
+                                            <li>부위별로 <strong>90% 하위</strong>, <strong>10% 상위</strong> 확률</li>
+                                            <li class="special-monster">특별 몬스터 : <strong>상위 방어구 2개 확정</strong>
+                                                <ul class="special-monsters-list">
+                                                    <li>진 다하드</li>
+                                                    <li>알슈베르도</li>
+                                                    <li>고어 마가라</li>
+                                                    <li>레 다우</li>
+                                                    <li>우드투나</li>
+                                                </ul>
+                                            </li>
+                                            <li>일반 몬스터 : <strong>상위 방어구 1개 확정</strong></li>
                                         </ul>
-                                    </li>
-                                    <li>일반 몬스터 : <strong>상위 방어구 1개 확정</strong></li>
-                                </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 럭키 효과 설명 -->
+                                <div class="col-md-4">
+                                    <div class="info-box">
+                                        <h5><i class="fa-solid fa-star me-2 text-warning"></i>럭키 효과</h5>
+                                        <ul class="fs-6">
+                                            <li>방어구 가챠 시 <strong>1% 확률</strong>로 럭키 효과 발동</li>
+                                            <li>럭키 효과 발동 시 <strong>원하는 방어구를 입을 수 있음</strong></li>
+                                            <li>방어구 뱃지에 <strong>✨</strong> 표시가 나타남</li>
+                                            <li>디스코드에 공유 시 <strong>LUCKY!</strong> 문구 표시</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <!-- 기타 정보 -->
+                                <div class="col-md-4">
+                                    <div class="info-box">
+                                        <h5><i class="fa-solid fa-shield-halved me-2 text-success"></i>기타 정보</h5>
+                                        <ul class="fs-6">
+                                            <li>모든 방어구는 <strong>호프셋</strong>으로 고정</li>
+                                            <li>몬스터 가챠 후 방어구/전체 가챠 실행 시 몬스터 효과 적용</li>
+                                            <li><strong>전체 가챠 몬스터 포함</strong> 활성화 시 몬스터도 함께 추첨</li>
+                                            <li>리셋 버튼으로 모든 결과 초기화 가능</li>
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- 럭키 효과 설명 -->
-                        <div class="col-md-4">
-                            <div class="info-box">
-                                <h5><i class="fa-solid fa-star me-2 text-warning"></i>럭키 효과</h5>
-                                <ul class="fs-6">
-                                    <li>방어구 가챠 시 <strong>1% 확률</strong>로 럭키 효과 발동</li>
-                                    <li>럭키 효과 발동 시 <strong>원하는 방어구를 입을 수 있음</strong></li>
-                                    <li>방어구 뱃지에 <strong>✨</strong> 표시가 나타남</li>
-                                    <li>디스코드에 공유 시 <strong>LUCKY!</strong> 문구 표시</li>
-                                </ul>
+            <!-- 설정 카드 (닉네임 + 토글 버튼들) -->
+            <div class="row mb-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="card shadow">
+                        <div class="card-header bg-dark text-white">
+                            <h4 class="mb-0"><i class="fa-solid fa-cog me-2"></i>설정</h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- 토글 버튼 그룹 -->
+                            <div class="row mb-3">
+                                <!-- 닉네임 설정 -->
+                                <div class="col-md-12 mb-3">
+                                    <div class="input-group">
+                                    <span class="input-group-text bg-dark text-white">
+                                        <i class="fa-solid fa-face-smile"></i>
+                                    </span>
+                                        <input type="text" class="form-control form-control-lg" id="nickname" placeholder="디스코드에 공유할 닉네임 입력" autocomplete="off">
+                                    </div>
+                                    <div class="form-text mt-1"><i class="fa-solid fa-circle-info me-1 text-primary"></i> 닉네임을 입력하면 결과가 디스코드 채널에 공유됩니다.</div>
+                                </div>
+
+                                <!-- 토글 스위치들 -->
+                                <div class="col-md-6">
+                                    <div id="discordToggleGroup" class="toggle-switch-group">
+                                        <div class="toggle-switch-title">
+                                            <i class="fab fa-discord me-2 text-primary"></i>디스코드 공유
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="shareToDiscord">
+                                            <label class="form-check-label" for="shareToDiscord">
+                                                결과를 디스코드 채널에 공유합니다
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div id="monsterToggleGroup" class="toggle-switch-group">
+                                        <div class="toggle-switch-title">
+                                            <i class="fa-solid fa-dragon me-2 text-warning"></i>전체 가챠 몬스터 포함
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="includeMonsterInLoadout">
+                                            <label class="form-check-label" for="includeMonsterInLoadout">
+                                                전체 가챠 시 몬스터도 함께 추첨합니다
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
-                        <!-- 기타 정보 -->
-                        <div class="col-md-4">
-                            <div class="info-box">
-                                <h5><i class="fa-solid fa-shield-halved me-2 text-success"></i>기타 정보</h5>
-                                <ul class="fs-6">
-                                    <li>모든 방어구는 <strong>호프셋</strong>으로 고정</li>
-                                    <li>몬스터 가챠 후 방어구/전체 가챠 실행 시 몬스터 효과 적용</li>
-                                    <li>리셋 버튼으로 모든 결과 초기화 가능</li>
-                                </ul>
+            <!-- 컨트롤 버튼 -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-2">
+                    <div class="d-grid">
+                        <button id="randomMonsterBtn" class="btn btn-lg btn-warning shadow" data-bs-toggle="tooltip" title="몬스터를 먼저 뽑으면 방어구 등급에 영향을 줍니다">
+                            <i class="fa-solid fa-dragon me-2"></i>몬스터 가챠
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-grid">
+                        <button id="randomWeaponBtn" class="btn btn-lg btn-primary shadow">
+                            <i class="fa-solid fa-khanda me-2"></i>무기 가챠
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-grid">
+                        <button id="randomArmorBtn" class="btn btn-lg btn-success shadow" data-bs-toggle="tooltip" title="1% 확률로 럭키 효과 발동!">
+                            <i class="fa-solid fa-shield-halved me-2"></i>방어구 가챠
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid">
+                        <button id="randomLoadoutBtn" class="btn btn-lg btn-danger shadow" data-bs-toggle="tooltip" title="무기와 방어구를 한번에 뽑습니다. 몬스터도 함께 추첨 가능">
+                            <i class="fa-solid fa-star me-2"></i>전체 가챠
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="d-grid">
+                        <button id="resetBtn" class="btn btn-lg btn-outline-secondary shadow">
+                            <i class="fa-solid fa-rotate me-2"></i>초기화
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 섹션 -->
+            <div class="row g-4">
+                <!-- 몬스터 결과 -->
+                <div class="col-md-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0"><i class="fa-solid fa-dragon me-2"></i>몬스터</h3>
+                            <div class="monster-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>몬스터 선택 시:<br>• 특별 몬스터: 상위 방어구 2개 확정<br>• 일반 몬스터: 상위 방어구 1개 확정</div>">
+                                <i class="fa-solid fa-circle-info text-white"></i>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- 몬스터 결과 표시 -->
+                            <div id="monsterResult" style="display: none;">
+                                <div class="text-center mb-4">
+                                    <h4 class="text-muted">선택된 몬스터</h4>
+                                    <div class="display-4 fw-bold my-4 text-warning" id="monsterType"></div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <img id="monsterImage" class="img-fluid rounded" style="max-height: 200px;" alt="몬스터 이미지">
+                                </div>
+                            </div>
+
+                            <!-- 몬스터 비어있을 때 -->
+                            <div id="monsterEmpty" class="text-center py-5">
+                                <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+                                <p class="lead text-muted mt-3">몬스터 가챠를 실행해 주세요</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 무기 결과 -->
+                <div class="col-md-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h3 class="mb-0"><i class="fa-solid fa-khanda me-2"></i>무기</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- 무기 결과 표시 -->
+                            <div id="weaponResult" style="display: none;">
+                                <div class="text-center mb-4">
+                                    <h4 class="text-muted">선택된 무기 종류</h4>
+                                    <div class="display-4 fw-bold my-4 text-primary" id="weaponType"></div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <img id="weaponImage" class="img-fluid rounded" style="max-height: 200px;" alt="무기 이미지">
+                                </div>
+                            </div>
+
+                            <!-- 무기 비어있을 때 -->
+                            <div id="weaponEmpty" class="text-center py-5">
+                                <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+                                <p class="lead text-muted mt-3">무기 가챠를 실행해 주세요</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 방어구 결과 -->
+                <div class="col-md-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0"><i class="fa-solid fa-shield-halved me-2"></i>방어구</h3>
+                            <div class="armor-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>모든 방어구는 호프셋으로 고정됩니다.<br>럭키 효과가 발동되면 원하는 방어구를 입을 수 있습니다.</div>">
+                                <i class="fa-solid fa-circle-info text-white"></i>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <!-- 방어구 결과 표시 -->
+                            <div id="armorResult" style="display: none;">
+                                <!-- 호프셋 표시 -->
+                                <div class="text-center mb-3">
+                                    <span class="badge bg-success fs-6 mb-2">호프셋</span>
+                                </div>
+
+                                <!-- 방어구 부위 카드 -->
+                                <div class="armor-parts-container">
+                                    <!-- 투구 -->
+                                    <div class="armor-part">
+                                        <div class="armor-icon">
+                                            <i class="fa-solid fa-helmet-safety"></i>
+                                        </div>
+                                        <div class="armor-info">
+                                            <div class="armor-name">투구</div>
+                                            <div class="armor-rank" id="headRank">하위</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 갑옷 -->
+                                    <div class="armor-part">
+                                        <div class="armor-icon">
+                                            <i class="fa-solid fa-shirt"></i>
+                                        </div>
+                                        <div class="armor-info">
+                                            <div class="armor-name">갑옷</div>
+                                            <div class="armor-rank" id="chestRank">하위</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 팔보호구 -->
+                                    <div class="armor-part">
+                                        <div class="armor-icon">
+                                            <i class="fa-solid fa-hand"></i>
+                                        </div>
+                                        <div class="armor-info">
+                                            <div class="armor-name">팔보호구</div>
+                                            <div class="armor-rank" id="armRank">하위</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 허리보호구 -->
+                                    <div class="armor-part">
+                                        <div class="armor-icon">
+                                            <i class="fa-solid fa-circle-dot"></i>
+                                        </div>
+                                        <div class="armor-info">
+                                            <div class="armor-name">허리보호구</div>
+                                            <div class="armor-rank" id="waistRank">하위</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 다리보호구 -->
+                                    <div class="armor-part">
+                                        <div class="armor-icon">
+                                            <i class="fa-solid fa-socks"></i>
+                                        </div>
+                                        <div class="armor-info">
+                                            <div class="armor-name">다리보호구</div>
+                                            <div class="armor-rank" id="legRank">하위</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 방어구 비어있을 때 -->
+                            <div id="armorEmpty" class="text-center py-5">
+                                <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
+                                <p class="lead text-muted mt-3">방어구 가챠를 실행해 주세요</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- 닉네임 입력 필드 -->
-    <div class="row mb-4">
-        <div class="col-md-6 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-dark text-white">
-                    <h4 class="mb-0"><i class="fa-solid fa-user me-2"></i>닉네임 설정</h4>
-                </div>
-                <div class="card-body">
-                    <div class="mb-0">
-                        <div class="input-group">
-                            <span class="input-group-text bg-dark text-white">
-                                <i class="fa-solid fa-face-smile"></i>
-                            </span>
-                            <input type="text" class="form-control form-control-lg" id="nickname" placeholder="디스코드에 공유할 닉네임 입력" autocomplete="off">
-                            <div class="input-group-text">
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="shareToDiscord">
-                                    <label class="form-check-label" for="shareToDiscord">디스코드 공유</label>
-                                </div>
+        <!-- 제비뽑기 탭 -->
+        <div class="tab-pane fade" id="lottery-content" role="tabpanel" aria-labelledby="lottery-tab">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card shadow">
+                        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                            <h3 class="mb-0"><i class="fa-solid fa-users me-2"></i>참가자 제비뽑기</h3>
+                            <div class="d-flex">
+                                <span class="badge bg-light text-dark me-2" id="participantCountBadge">참가자 0명</span>
                             </div>
                         </div>
-                        <div class="form-text mt-2"><i class="fa-solid fa-circle-info me-1 text-primary"></i> 닉네임을 입력하고 체크박스를 선택하면 결과가 디스코드 채널에 공유됩니다.</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                        <div class="card-body">
+                            <!-- 참가자 입력 폼 -->
+                            <div class="row mb-4">
+                                <div class="col-md-8 mx-auto">
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control form-control-lg" id="participantNameInput" placeholder="참가자 이름 입력" aria-label="참가자 이름">
+                                        <button class="btn btn-primary" type="button" id="addParticipantBtn">
+                                            <i class="fa-solid fa-plus me-1"></i> 추가
+                                        </button>
+                                    </div>
+                                    <div class="form-text mb-3">엔터 키를 눌러 빠르게 참가자를 추가할 수 있습니다.</div>
 
-    <!-- 컨트롤 버튼 -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-2">
-            <div class="d-grid">
-                <button id="randomMonsterBtn" class="btn btn-lg btn-warning shadow" data-bs-toggle="tooltip" title="몬스터를 먼저 뽑으면 방어구 등급에 영향을 줍니다">
-                    <i class="fa-solid fa-dragon me-2"></i>몬스터 가챠
-                </button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="d-grid">
-                <button id="randomWeaponBtn" class="btn btn-lg btn-primary shadow">
-                    <i class="fa-solid fa-khanda me-2"></i>무기 가챠
-                </button>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="d-grid">
-                <button id="randomArmorBtn" class="btn btn-lg btn-success shadow" data-bs-toggle="tooltip" title="1% 확률로 럭키 효과 발동!">
-                    <i class="fa-solid fa-shield-halved me-2"></i>방어구 가챠
-                </button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="d-grid">
-                <button id="randomLoadoutBtn" class="btn btn-lg btn-danger shadow" data-bs-toggle="tooltip" title="무기와 방어구를 한번에 뽑습니다">
-                    <i class="fa-solid fa-star me-2"></i>전체 가챠
-                </button>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="d-grid">
-                <button id="resetBtn" class="btn btn-lg btn-outline-secondary shadow">
-                    <i class="fa-solid fa-rotate me-2"></i>초기화
-                </button>
-            </div>
-        </div>
-    </div>
+                                    <!-- 추가된 참가자 목록 -->
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">참가자 명단</h6>
+                                            <button class="btn btn-sm btn-outline-danger" id="clearParticipantsBtn">
+                                                <i class="fa-solid fa-trash me-1"></i> 목록 초기화
+                                            </button>
+                                        </div>
+                                        <div class="card-body p-0" style="max-height: 200px; overflow-y: auto;">
+                                            <ul class="list-group list-group-flush" id="participantsList">
+                                                <!-- 참가자 목록이 여기에 동적으로 추가됨 -->
+                                                <li class="list-group-item text-center text-muted" id="emptyParticipantMessage">참가자가 없습니다</li>
+                                            </ul>
+                                        </div>
+                                    </div>
 
-    <!-- 결과 섹션 -->
-    <div class="row g-4">
-        <!-- 몬스터 결과 -->
-        <div class="col-md-4">
-            <div class="card shadow h-100">
-                <div class="card-header bg-warning text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0"><i class="fa-solid fa-dragon me-2"></i>몬스터</h3>
-                    <div class="monster-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>몬스터 선택 시:<br>• 특별 몬스터: 상위 방어구 2개 확정<br>• 일반 몬스터: 상위 방어구 1개 확정</div>">
-                        <i class="fa-solid fa-circle-info text-white"></i>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- 몬스터 결과 표시 -->
-                    <div id="monsterResult" style="display: none;">
-                        <div class="text-center mb-4">
-                            <h4 class="text-muted">선택된 몬스터</h4>
-                            <div class="display-4 fw-bold my-4 text-warning" id="monsterType"></div>
-                        </div>
-                        <div class="text-center mt-3">
-                            <img id="monsterImage" class="img-fluid rounded" style="max-height: 200px;" alt="몬스터 이미지">
-                        </div>
-                    </div>
+                                    <!-- 제비뽑기 설정 -->
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">
+                                            <h6 class="mb-0">제비뽑기 설정</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label class="form-label">한 그룹당 인원 수</label>
+                                                <div class="btn-group w-100" role="group" aria-label="그룹당 인원 수">
+                                                    <input type="radio" class="btn-check" name="groupSize" id="groupSize1" value="1" checked>
+                                                    <label class="btn btn-outline-primary" for="groupSize1">1명</label>
 
-                    <!-- 몬스터 비어있을 때 -->
-                    <div id="monsterEmpty" class="text-center py-5">
-                        <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
-                        <p class="lead text-muted mt-3">몬스터 가챠를 실행해 주세요</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                                    <input type="radio" class="btn-check" name="groupSize" id="groupSize2" value="2">
+                                                    <label class="btn btn-outline-primary" for="groupSize2">2명</label>
 
-        <!-- 무기 결과 -->
-        <div class="col-md-4">
-            <div class="card shadow h-100">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0"><i class="fa-solid fa-khanda me-2"></i>무기</h3>
-                </div>
-                <div class="card-body">
-                    <!-- 무기 결과 표시 -->
-                    <div id="weaponResult" style="display: none;">
-                        <div class="text-center mb-4">
-                            <h4 class="text-muted">선택된 무기 종류</h4>
-                            <div class="display-4 fw-bold my-4 text-primary" id="weaponType"></div>
-                        </div>
-                        <div class="text-center mt-3">
-                            <img id="weaponImage" class="img-fluid rounded" style="max-height: 200px;" alt="무기 이미지">
-                        </div>
-                    </div>
+                                                    <input type="radio" class="btn-check" name="groupSize" id="groupSize3" value="3">
+                                                    <label class="btn btn-outline-primary" for="groupSize3">3명</label>
 
-                    <!-- 무기 비어있을 때 -->
-                    <div id="weaponEmpty" class="text-center py-5">
-                        <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
-                        <p class="lead text-muted mt-3">무기 가챠를 실행해 주세요</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+                                                    <input type="radio" class="btn-check" name="groupSize" id="groupSize4" value="4">
+                                                    <label class="btn btn-outline-primary" for="groupSize4">4명</label>
+                                                </div>
+                                            </div>
 
-        <!-- 방어구 결과 -->
-        <div class="col-md-4">
-            <div class="card shadow h-100">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0"><i class="fa-solid fa-shield-halved me-2"></i>방어구</h3>
-                    <div class="armor-info-trigger" data-bs-toggle="tooltip" data-bs-html="true" title="<div class='text-start'>모든 방어구는 호프셋으로 고정됩니다.<br>럭키 효과가 발동되면 원하는 방어구를 입을 수 있습니다.</div>">
-                        <i class="fa-solid fa-circle-info text-white"></i>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- 방어구 결과 표시 -->
-                    <div id="armorResult" style="display: none;">
-                        <!-- 호프셋 표시 -->
-                        <div class="text-center mb-3">
-                            <span class="badge bg-success fs-6 mb-2">호프셋</span>
-                        </div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="randomizeGroups" checked>
+                                                <label class="form-check-label" for="randomizeGroups">
+                                                    참가자 순서 랜덤 섞기
+                                                </label>
+                                            </div>
 
-                        <!-- 방어구 부위 카드 -->
-                        <div class="armor-parts-container">
-                            <!-- 투구 -->
-                            <div class="armor-part">
-                                <div class="armor-icon">
-                                    <i class="fa-solid fa-helmet-safety"></i>
-                                </div>
-                                <div class="armor-info">
-                                    <div class="armor-name">투구</div>
-                                    <div class="armor-rank" id="headRank">하위</div>
+                                            <div class="form-check mb-3">
+                                                <input class="form-check-input" type="checkbox" id="shareLotteryToDiscord" checked>
+                                                <label class="form-check-label" for="shareLotteryToDiscord">
+                                                    <i class="fab fa-discord me-2 text-primary"></i>결과를 디스코드에 자동으로 공유합니다
+                                                </label>
+                                                <div class="form-text mt-1">
+                                                    <small>상단 설정에 입력된 닉네임으로 공유됩니다</small>
+                                                </div>
+                                            </div>
+
+                                            <div class="d-grid">
+                                                <button id="startDrawBtn" class="btn btn-lg btn-primary shadow">
+                                                    <i class="fa-solid fa-random me-2"></i>제비뽑기 시작
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 갑옷 -->
-                            <div class="armor-part">
-                                <div class="armor-icon">
-                                    <i class="fa-solid fa-shirt"></i>
+                            <!-- 제비뽑기 결과 -->
+                            <div id="drawResults" style="display: none;">
+                                <h4 class="text-center text-primary mb-4">🎉 제비뽑기 결과 🎉</h4>
+                                <div id="groupResults" class="row g-4">
+                                    <!-- 그룹 결과가 여기에 동적으로 추가됨 -->
                                 </div>
-                                <div class="armor-info">
-                                    <div class="armor-name">갑옷</div>
-                                    <div class="armor-rank" id="chestRank">하위</div>
-                                </div>
-                            </div>
 
-                            <!-- 팔보호구 -->
-                            <div class="armor-part">
-                                <div class="armor-icon">
-                                    <i class="fa-solid fa-hand"></i>
-                                </div>
-                                <div class="armor-info">
-                                    <div class="armor-name">팔보호구</div>
-                                    <div class="armor-rank" id="armRank">하위</div>
-                                </div>
-                            </div>
-
-                            <!-- 허리보호구 -->
-                            <div class="armor-part">
-                                <div class="armor-icon">
-                                    <i class="fa-solid fa-circle-dot"></i>
-                                </div>
-                                <div class="armor-info">
-                                    <div class="armor-name">허리보호구</div>
-                                    <div class="armor-rank" id="waistRank">하위</div>
-                                </div>
-                            </div>
-
-                            <!-- 다리보호구 -->
-                            <div class="armor-part">
-                                <div class="armor-icon">
-                                    <i class="fa-solid fa-socks"></i>
-                                </div>
-                                <div class="armor-info">
-                                    <div class="armor-name">다리보호구</div>
-                                    <div class="armor-rank" id="legRank">하위</div>
+                                <div class="text-center mt-4">
+                                    <button id="resetDrawBtn" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-undo me-2"></i>다시 뽑기
+                                    </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- 방어구 비어있을 때 -->
-                    <div id="armorEmpty" class="text-center py-5">
-                        <i class="fa-solid fa-question text-muted" style="font-size: 3rem;"></i>
-                        <p class="lead text-muted mt-3">방어구 가챠를 실행해 주세요</p>
                     </div>
                 </div>
             </div>
@@ -442,16 +472,27 @@
         </div>
     </div>
 
+    <!-- 제비뽑기 애니메이션 오버레이 -->
+    <div id="drawingOverlay" style="display: none;">
+        <div class="drawing-animation">
+            <div class="spinner-border text-light" role="status" style="width: 4rem; height: 4rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h2 class="text-light mt-3">제비뽑기 중...</h2>
+        </div>
+    </div>
+
     <!-- 푸터 -->
     <footer class="mt-5 text-center text-muted">
         <hr>
         <p class="small">&copy; made by 휴파</p>
     </footer>
 </div>
-
+<script src="/js/admin.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/lucky-effects.js"></script>
 <script src="/js/gacha.js"></script>
+<script src="/js/participants.js"></script>
 
 <script>
     // 툴팁 초기화

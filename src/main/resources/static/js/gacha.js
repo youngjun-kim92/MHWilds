@@ -1,4 +1,4 @@
-// 몬스터헌터 무기 & 방어구 & 몬스터 가챠 시스템
+// 몬스터헌터 무기 & 방어구 & 몬스터 가챠 시스템 - 실시간 설정 적용
 document.addEventListener('DOMContentLoaded', function() {
     // 버튼 요소 가져오기
     const randomWeaponBtn = document.getElementById('randomWeaponBtn');
@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const shareToDiscordCheckbox = document.getElementById('shareToDiscord');
     const discordToast = document.getElementById('discordToast');
     const discordToastMessage = document.getElementById('discordToastMessage');
+
+    // 몬스터 토글 체크박스
+    const includeMonsterInLoadout = document.getElementById('includeMonsterInLoadout');
+
+    // 토글 그룹 참조
+    const monsterToggleGroup = document.getElementById('monsterToggleGroup');
+    const discordToggleGroup = document.getElementById('discordToggleGroup');
 
     // 결과 섹션 요소
     const weaponResult = document.getElementById('weaponResult');
@@ -96,6 +103,13 @@ document.addEventListener('DOMContentLoaded', function() {
         shareToDiscordCheckbox.checked = true;
     }
 
+    // 저장된 몬스터 포함 상태 불러오기
+    const savedIncludeMonster = localStorage.getItem('mhGachaIncludeMonster');
+    if (savedIncludeMonster === 'true') {
+        includeMonsterInLoadout.checked = true;
+        monsterToggleGroup.classList.add('toggle-active');
+    }
+
     // 닉네임 입력시 저장
     nicknameInput.addEventListener('input', function() {
         localStorage.setItem('mhGachaNickname', nicknameInput.value);
@@ -104,6 +118,25 @@ document.addEventListener('DOMContentLoaded', function() {
     // 체크박스 변경시 저장
     shareToDiscordCheckbox.addEventListener('change', function() {
         localStorage.setItem('mhGachaShareToDiscord', shareToDiscordCheckbox.checked);
+
+        // 토글 그룹 활성화/비활성화
+        if (this.checked) {
+            discordToggleGroup.classList.add('toggle-active');
+        } else {
+            discordToggleGroup.classList.remove('toggle-active');
+        }
+    });
+
+    // 몬스터 포함 체크박스 변경시 저장
+    includeMonsterInLoadout.addEventListener('change', function() {
+        localStorage.setItem('mhGachaIncludeMonster', includeMonsterInLoadout.checked);
+
+        // 토글 그룹 활성화/비활성화
+        if (this.checked) {
+            monsterToggleGroup.classList.add('toggle-active');
+        } else {
+            monsterToggleGroup.classList.remove('toggle-active');
+        }
     });
 
     // 엔터키 입력 시 전체 가챠 실행
@@ -129,9 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 방어구 가챠 버튼 클릭 이벤트
-    randomArmorBtn.addEventListener('click', function() {
+    randomArmorBtn.addEventListener('click', async function() {
         // 방어구 랜덤 선택 (몬스터 영향 반영)
-        const result = getRandomArmor();
+        const result = await getRandomArmor();
         currentArmor = result.armorSet;
         const isLucky = result.isLucky;
 
@@ -161,10 +194,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // 전체 가챠 버튼 클릭 이벤트
-    randomLoadoutBtn.addEventListener('click', function() {
+    randomLoadoutBtn.addEventListener('click', async function() {
+        // 몬스터 포함 여부 확인
+        if (includeMonsterInLoadout.checked) {
+            // 몬스터도 함께 추첨
+            const randomMonster = getRandomMonster();
+            currentMonster = randomMonster;
+            displayMonster(randomMonster);
+            console.log("전체 가챠 결과 - 몬스터:", currentMonster);
+        }
+
         // 무기 및 방어구 랜덤 선택
         const randomWeapon = getRandomWeapon();
-        const result = getRandomArmor();
+        const result = await getRandomArmor();
         const isLucky = result.isLucky;
 
         currentWeapon = randomWeapon;
@@ -187,6 +229,31 @@ document.addEventListener('DOMContentLoaded', function() {
         resetAll();
     });
 
+    // 서버에서 가챠 설정 가져오기 (실시간)
+    async function fetchGachaSettings() {
+        try {
+            // API 엔드포인트 호출
+            const response = await fetch('/api/settings/gacha');
+            if (!response.ok) {
+                throw new Error('서버에서 설정을 가져오는데 실패했습니다');
+            }
+            const settings = await response.json();
+
+            // 설정 로깅
+            console.log('서버에서 가챠 설정 로드됨:', settings);
+            return settings;
+        } catch (error) {
+            console.error('가챠 설정 가져오기 실패:', error);
+            // 오류 발생 시 기본값 반환
+            return {
+                luckyChance: 0.01, // 기본 1% 확률
+                defaultHighRankCount: 1,
+                specialHighRankCount: 2,
+                specialMonsters: ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA']
+            };
+        }
+    }
+
     // 랜덤 무기 선택 함수
     function getRandomWeapon() {
         return weaponTypes[Math.floor(Math.random() * weaponTypes.length)];
@@ -197,13 +264,16 @@ document.addEventListener('DOMContentLoaded', function() {
         return monsterTypes[Math.floor(Math.random() * monsterTypes.length)];
     }
 
-    // 랜덤 방어구 선택 함수 (몬스터 영향 추가 - 확률 로직 개선)
-    function getRandomArmor(forceLucky = false) {
+    // 랜덤 방어구 선택 함수 (실시간 설정 적용)
+    async function getRandomArmor(forceLucky = false) {
+        // 실행할 때마다 최신 설정 가져오기
+        const settings = await fetchGachaSettings();
+
         // 결과 객체 초기화
         const armorSet = {};
 
-        // 럭키 효과는 1% 확률로 발동, 또는 테스트 모드에서 강제 적용
-        let isLucky = forceLucky || Math.random() <= 0.01;
+        // 럭키 효과는 설정된 확률로 발동, 또는 테스트 모드에서 강제 적용
+        let isLucky = forceLucky || (Math.random() <= settings.luckyChance);
 
         // 럭키 효과 발동 시 화려한 효과 표시
         if (isLucky && typeof showLuckyEffect === 'function') {
@@ -213,21 +283,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // 몬스터가 선택되었는지 확인
         const hasSelectedMonster = currentMonster !== null;
 
-        // 특별 상위 방어구 2개 확정 나오는 몬스터 목록
-        const specialMonsters = ['TRUE_DAHARD', 'ALSUVERDE', 'GORE_MAGALA', 'RADAU', 'WOODTUNA'];
+        // 특별 몬스터인지 확인 (서버 설정 사용)
+        const isSpecialMonster = hasSelectedMonster &&
+            settings.specialMonsters.includes(currentMonster.name);
 
-        // 몬스터가 선택되었고 특별 몬스터인 경우
-        const isSpecialMonster = hasSelectedMonster && specialMonsters.includes(currentMonster.name);
-
-        // 기본 상위 방어구 개수 결정
+        // 기본 상위 방어구 개수 결정 (서버 설정 사용)
         let baseHighRankCount = 0;
         if (hasSelectedMonster) {
             if (isSpecialMonster) {
-                // 특별 몬스터: 2개 확정
-                baseHighRankCount = 2;
+                // 특별 몬스터: 서버 설정된 개수 확정
+                baseHighRankCount = settings.specialHighRankCount;
             } else {
-                // 일반 몬스터: 1개 확정
-                baseHighRankCount = 1;
+                // 일반 몬스터: 서버 설정된 개수 확정
+                baseHighRankCount = settings.defaultHighRankCount;
             }
         }
 
@@ -274,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const highCount = Object.values(armorSet).filter(rank => rank.name === 'HIGH_RANK').length;
         const lowCount = Object.values(armorSet).filter(rank => rank.name === 'LOW_RANK').length;
         console.log(`방어구 구성: 기본 상위 ${baseHighRankCount}개, 추가 상위 ${extraHighRankCount}개, 최종 상위 ${highCount}개, 하위 ${lowCount}개, 럭키: ${isLucky}`);
-        console.log(`몬스터 선택됨: ${hasSelectedMonster}, 특별 몬스터: ${isSpecialMonster}`);
+        console.log(`럭키 확률: ${settings.luckyChance * 100}%, 몬스터 선택됨: ${hasSelectedMonster}, 특별 몬스터: ${isSpecialMonster}`);
 
         return {
             armorSet: armorSet,
@@ -501,4 +569,17 @@ document.addEventListener('DOMContentLoaded', function() {
         monsterEmpty.style.display = 'block';
         currentMonster = null;
     }
+
+    // 개발용: 럭키 모드 테스트 함수
+    window.testLuckyMode = async function() {
+        console.log('럭키 모드 테스트');
+        const result = await getRandomArmor(true); // 럭키 모드 강제 활성화
+        currentArmor = result.armorSet;
+        displayArmor(currentArmor, true);
+
+        // 알림 표시
+        const toast = new bootstrap.Toast(document.getElementById('discordToast'));
+        document.getElementById('discordToastMessage').innerHTML = '🎉 <strong>LUCKY!</strong> 🎉 럭키 모드 테스트 중입니다!';
+        toast.show();
+    };
 });

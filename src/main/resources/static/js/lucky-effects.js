@@ -7,7 +7,7 @@ function showLuckyEffect() {
         <div class="lucky-content">
             <div class="lucky-icon">🎉</div>
             <div class="lucky-title">LUCKY!</div>
-            <div class="lucky-message">행운의 여신이 함께하길</div>
+            <div class="lucky-message">이게 걸리네🤣👍</div>
         </div>
     `;
     document.body.appendChild(luckyOverlay);

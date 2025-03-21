@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -120,6 +121,60 @@ public class DiscordController {
 
         } catch (Exception e) {
             logger.error("Error in share-to-discord API", e);
+            response.put("success", false);
+            response.put("message", "서버 오류: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    /**
+     * 디스코드에 제비뽑기 결과 공유 API
+     * @param payload 클라이언트에서 전송한 제비뽑기 결과 데이터
+     * @return 성공 여부와 메시지
+     */
+    @PostMapping("/share-lottery-to-discord")
+    public ResponseEntity<Map<String, Object>> shareLotteryToDiscord(@RequestBody Map<String, Object> payload) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // 데이터 추출
+            String nickname = (String) payload.get("nickname");
+            int groupSize = ((Number) payload.getOrDefault("groupSize", 1)).intValue();
+            boolean randomized = Boolean.TRUE.equals(payload.get("randomized"));
+
+            // 참가자 목록 추출
+            List<List<String>> groups = (List<List<String>>) payload.get("groups");
+
+            logger.info("Received share-lottery-to-discord request from {} with {} groups", nickname, groups.size());
+
+            // 닉네임 유효성 검사
+            if (nickname == null || nickname.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "닉네임이 비어있습니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 그룹 유효성 검사
+            if (groups == null || groups.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "제비뽑기 결과가 비어있습니다");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 디스코드에 결과 전송
+            boolean success = discordService.sendLotteryResultToDiscord(nickname, groups, groupSize, randomized);
+
+            response.put("success", success);
+            if (success) {
+                response.put("message", "디스코드 채널에 제비뽑기 결과가 성공적으로 공유되었습니다");
+            } else {
+                response.put("message", "디스코드 전송 중 오류가 발생했습니다");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error in share-lottery-to-discord API", e);
             response.put("success", false);
             response.put("message", "서버 오류: " + e.getMessage());
             return ResponseEntity.internalServerError().body(response);

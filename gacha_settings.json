@@ -1,0 +1,7 @@
+{
+  "luckyChance" : 0.01,
+  "defaultHighRankCount" : 1,
+  "specialHighRankCount" : 2,
+  "specialMonsters" : [ "TRUE_DAHARD", "ALSUVERDE", "GORE_MAGALA", "RADAU", "WOODTUNA" ],
+  "lastUpdated" : 1742566063101
+}
